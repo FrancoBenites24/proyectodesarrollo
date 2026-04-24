@@ -5,7 +5,7 @@
 
 [![CI](https://github.com/FrancoBenites24/ProyectoDesarrollo/actions/workflows/ci.yml/badge.svg)](https://github.com/FrancoBenites24/ProyectoDesarrollo/actions)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-UTP-green.svg)](LICENSE)
 
 ---
 

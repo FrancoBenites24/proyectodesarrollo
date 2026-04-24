@@ -1,4 +1,4 @@
-# 🚗 DrowsyGuard v2.0
+# 🚗 DriverDrowsGuard v1.0
 
 > Sistema de detección de somnolencia en conductores en tiempo real.  
 > Basado en **Mediapipe FaceMesh** + análisis temporal **PERCLOS**.
@@ -50,4 +50,4 @@ Ver [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## 📜 Licencia
 
-MIT
+UTP

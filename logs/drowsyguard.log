@@ -1,0 +1,12 @@
+2026-04-24 17:57:12 | DEBUG    | src.utils.logger:77 — Logger configurado | level=INFO | file=logs/drowsyguard.log
+2026-04-24 17:57:12 | INFO     | tests.unit.test_logger:29 — Test message — info level
+2026-04-24 17:57:12 | WARNING  | tests.unit.test_logger:37 — Test message — warning level
+2026-04-24 17:57:12 | ERROR    | tests.unit.test_logger:45 — Test message — error level
+2026-04-24 17:57:12 | DEBUG    | tests.unit.test_logger:53 — Test message — debug level
+2026-04-24 17:57:12 | INFO     | tests.unit.test_logger:72 — From logger1
+2026-04-24 17:57:12 | INFO     | tests.unit.test_logger:73 — From logger2
+2026-04-24 17:57:12 | INFO     | tests.unit.test_logger:82 — Test con valor=42 y tipo=int
+2026-04-24 18:13:04 | DEBUG    | src.utils.logger:78 — Logger configurado | level=INFO | file=logs/drowsyguard.log
+2026-04-24 18:13:04 | WARNING  | src.utils.calculations:60 — EAR esperaba 6 puntos, recibió 3
+2026-04-24 18:13:04 | WARNING  | src.utils.calculations:69 — EAR: distancia horizontal cercana a cero
+2026-04-24 18:13:04 | WARNING  | src.utils.calculations:87 — MOR esperaba 4 puntos, recibió 2

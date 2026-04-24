@@ -2,7 +2,7 @@
 name = "DriverDrowsGuard"
 version = "1.0.0"
 description = "Real-time driver drowsiness detection system"
-authors = ["DriverDrowsyGuard  Team"]
+authors = ["DriverDrowsyGuard Team"]
 
 [tool.poetry.dependencies]
 python = "^3.11"

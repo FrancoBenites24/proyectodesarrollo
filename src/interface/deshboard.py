@@ -1,4 +1,5 @@
 """Dashboard Streamlit para monitoreo de somnolencia en tiempo real."""
+
 from __future__ import annotations
 
 import time
@@ -48,24 +49,19 @@ st.markdown(
 
 # ── Funciones helper ──────────────────────────────────────────────
 @st.cache_data(ttl=1)
-
 def fetch_metrics():
     return {
         "ear": round(random.uniform(0.2, 0.4), 3),
         "mor": round(random.uniform(0.3, 0.7), 3),
         "perclos": round(random.uniform(0.1, 0.6), 2),
         "fps": random.randint(15, 25),
-        "alert_level": random.randint(0, 3)
+        "alert_level": random.randint(0, 3),
     }
 
 
 @st.cache_data(ttl=5)
 def fetch_health():
-    return {
-        "status": "ok",
-        "camera_connected": True,
-        "uptime_seconds": 120
-    }
+    return {"status": "ok", "camera_connected": True, "uptime_seconds": 120}
 
 
 def start_stream(source: int = 0):
@@ -92,11 +88,17 @@ st.title("🚗 DrowsyGuard — Monitor en Tiempo Real")
 health = fetch_health()
 if health:
     col_h1, col_h2, col_h3 = st.columns(3)
-    col_h1.info(f"**API:** {'🟢 OK' if health['status'] == 'ok' else '🔴 ' + health['status']}")
-    col_h2.info(f"**Cámara:** {'✅ Conectada' if health['camera_connected'] else '❌ Desconectada'}")
+    col_h1.info(
+        f"**API:** {'🟢 OK' if health['status'] == 'ok' else '🔴 ' + health['status']}"
+    )
+    col_h2.info(
+        f"**Cámara:** {'✅ Conectada' if health['camera_connected'] else '❌ Desconectada'}"
+    )
     col_h3.info(f"**Uptime:** {health['uptime_seconds']:.0f}s")
 else:
-    st.error("⚠️ No se puede conectar con la API. Verifica que esté corriendo en localhost:8000")
+    st.error(
+        "⚠️ No se puede conectar con la API. Verifica que esté corriendo en localhost:8000"
+    )
 
 # Controles
 c1, c2, c3 = st.columns([1, 1, 6])
@@ -158,9 +160,7 @@ while True:
 
             # ── Gauge de PERCLOS ──────────────────────────────────
             bar_color = (
-                "#3fb950" if alert == 0
-                else "#d29922" if alert == 1
-                else "#f85149"
+                "#3fb950" if alert == 0 else "#d29922" if alert == 1 else "#f85149"
             )
             fig_gauge = go.Figure(
                 go.Indicator(

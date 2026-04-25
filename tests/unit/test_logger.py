@@ -6,6 +6,7 @@ Verifica que el módulo de logging:
 - Crea el directorio de logs automáticamente.
 - Responde a la variable de entorno LOG_LEVEL.
 """
+
 from __future__ import annotations
 
 import os

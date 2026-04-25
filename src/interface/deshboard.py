@@ -93,12 +93,14 @@ if health:
         f"**API:** {'🟢 OK' if health['status'] == 'ok' else '🔴 ' + health['status']}"
     )
     col_h2.info(
-        f"**Cámara:** {'✅ Conectada' if health['camera_connected'] else '❌ Desconectada'}"
+        f"**Cámara:** "
+        f"{'✅ Conectada' if health['camera_connected'] else '❌ Desconectada'}"
     )
     col_h3.info(f"**Uptime:** {health['uptime_seconds']:.0f}s")
 else:
     st.error(
-        "⚠️ No se puede conectar con la API. Verifica que esté corriendo en localhost:8000"
+        "⚠️ No se puede conectar con la API. "
+        "Verifica que esté corriendo en localhost:8000"
     )
 
 # Controles

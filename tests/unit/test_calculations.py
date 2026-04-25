@@ -7,9 +7,9 @@ retornando None o 0.0 en lugar de lanzar excepciones.
 
 from __future__ import annotations
 
-import math
 
-import pytest
+
+
 
 from src.utils.calculations import Calculator
 

@@ -46,3 +46,12 @@
 2026-04-25 16:02:41 | INFO     | src.core.temporal:51 — TemporalAnalyzer | ventana=1s | fps=5 | tamaño_buffer=5
 2026-04-25 16:02:41 | INFO     | src.core.temporal:51 — TemporalAnalyzer | ventana=1s | fps=5 | tamaño_buffer=5
 2026-04-25 16:02:41 | DEBUG    | src.core.temporal:94 — TemporalAnalyzer buffer reiniciado
+2026-04-25 16:42:09 | DEBUG    | src.utils.logger:78 — Logger configurado | level=INFO | file=logs/drowsyguard.log
+2026-04-25 16:42:09 | INFO     | src.core.temporal:52 — TemporalAnalyzer | ventana=1s | fps=10 | tamaño_buffer=10
+2026-04-25 16:42:09 | INFO     | src.core.temporal:52 — TemporalAnalyzer | ventana=1s | fps=10 | tamaño_buffer=10
+2026-04-25 16:42:09 | INFO     | src.core.temporal:52 — TemporalAnalyzer | ventana=1s | fps=10 | tamaño_buffer=10
+2026-04-25 16:42:09 | INFO     | src.core.temporal:52 — TemporalAnalyzer | ventana=1s | fps=10 | tamaño_buffer=10
+2026-04-25 16:42:09 | INFO     | src.core.temporal:52 — TemporalAnalyzer | ventana=1s | fps=10 | tamaño_buffer=10
+2026-04-25 16:42:09 | INFO     | src.core.temporal:52 — TemporalAnalyzer | ventana=1s | fps=5 | tamaño_buffer=5
+2026-04-25 16:42:09 | INFO     | src.core.temporal:52 — TemporalAnalyzer | ventana=1s | fps=5 | tamaño_buffer=5
+2026-04-25 16:42:09 | DEBUG    | src.core.temporal:95 — TemporalAnalyzer buffer reiniciado

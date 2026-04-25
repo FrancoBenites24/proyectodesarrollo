@@ -10,3 +10,30 @@
 2026-04-24 18:13:04 | WARNING  | src.utils.calculations:60 — EAR esperaba 6 puntos, recibió 3
 2026-04-24 18:13:04 | WARNING  | src.utils.calculations:69 — EAR: distancia horizontal cercana a cero
 2026-04-24 18:13:04 | WARNING  | src.utils.calculations:87 — MOR esperaba 4 puntos, recibió 2
+2026-04-25 15:33:01 | DEBUG    | src.utils.logger:78 — Logger configurado | level=INFO | file=logs/drowsyguard.log
+2026-04-25 15:33:20 | DEBUG    | src.utils.logger:78 — Logger configurado | level=INFO | file=logs/drowsyguard.log
+2026-04-25 15:34:39 | DEBUG    | src.utils.logger:78 — Logger configurado | level=INFO | file=logs/drowsyguard.log
+2026-04-25 15:34:39 | INFO     | src.core.detector:109 — DrowsinessDetector listo | EAR_threshold=0.25 | MOR_threshold=0.6
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 15:34:39 | INFO     | src.core.detector:109 — DrowsinessDetector listo | EAR_threshold=0.25 | MOR_threshold=0.6
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 15:34:39 | INFO     | src.core.detector:109 — DrowsinessDetector listo | EAR_threshold=0.25 | MOR_threshold=0.6
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 15:34:39 | INFO     | src.core.detector:109 — DrowsinessDetector listo | EAR_threshold=0.25 | MOR_threshold=0.6
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 15:34:39 | INFO     | src.core.detector:109 — DrowsinessDetector listo | EAR_threshold=0.25 | MOR_threshold=0.6
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 15:34:39 | INFO     | src.core.detector:109 — DrowsinessDetector listo | EAR_threshold=0.25 | MOR_threshold=0.6
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 15:34:39 | INFO     | src.core.detector:109 — DrowsinessDetector listo | EAR_threshold=0.25 | MOR_threshold=0.6
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 15:34:39 | INFO     | src.core.detector:109 — DrowsinessDetector listo | EAR_threshold=0.2 | MOR_threshold=0.5
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 15:34:39 | INFO     | src.core.detector:109 — DrowsinessDetector listo | EAR_threshold=0.25 | MOR_threshold=0.6
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 15:34:39 | INFO     | src.core.detector:109 — DrowsinessDetector listo | EAR_threshold=0.25 | MOR_threshold=0.6
+2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0

@@ -37,3 +37,12 @@
 2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
 2026-04-25 15:34:39 | INFO     | src.core.detector:109 — DrowsinessDetector listo | EAR_threshold=0.25 | MOR_threshold=0.6
 2026-04-25 15:34:39 | DEBUG    | src.utils.preprocess:78 — Mejorando frame | luminancia_media=0.0
+2026-04-25 16:02:41 | DEBUG    | src.utils.logger:78 — Logger configurado | level=INFO | file=logs/drowsyguard.log
+2026-04-25 16:02:41 | INFO     | src.core.temporal:51 — TemporalAnalyzer | ventana=1s | fps=10 | tamaño_buffer=10
+2026-04-25 16:02:41 | INFO     | src.core.temporal:51 — TemporalAnalyzer | ventana=1s | fps=10 | tamaño_buffer=10
+2026-04-25 16:02:41 | INFO     | src.core.temporal:51 — TemporalAnalyzer | ventana=1s | fps=10 | tamaño_buffer=10
+2026-04-25 16:02:41 | INFO     | src.core.temporal:51 — TemporalAnalyzer | ventana=1s | fps=10 | tamaño_buffer=10
+2026-04-25 16:02:41 | INFO     | src.core.temporal:51 — TemporalAnalyzer | ventana=1s | fps=10 | tamaño_buffer=10
+2026-04-25 16:02:41 | INFO     | src.core.temporal:51 — TemporalAnalyzer | ventana=1s | fps=5 | tamaño_buffer=5
+2026-04-25 16:02:41 | INFO     | src.core.temporal:51 — TemporalAnalyzer | ventana=1s | fps=5 | tamaño_buffer=5
+2026-04-25 16:02:41 | DEBUG    | src.core.temporal:94 — TemporalAnalyzer buffer reiniciado

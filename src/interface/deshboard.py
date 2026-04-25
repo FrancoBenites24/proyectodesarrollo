@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import random
 import time
 from collections import deque
-import random
+
 import httpx
 import plotly.graph_objects as go
 import streamlit as st

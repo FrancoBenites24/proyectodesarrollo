@@ -1,5 +1,7 @@
 """Tests para TemporalAnalyzer y AlertLevel."""
+
 import pytest
+
 from src.core.temporal import AlertLevel, TemporalAnalyzer
 
 

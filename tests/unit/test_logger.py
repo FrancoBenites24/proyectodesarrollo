@@ -6,11 +6,10 @@ Verifica que el módulo de logging:
 - Crea el directorio de logs automáticamente.
 - Responde a la variable de entorno LOG_LEVEL.
 """
+
 from __future__ import annotations
 
 import os
-
-import pytest
 
 
 def test_get_logger_returns_logger():
@@ -57,7 +56,6 @@ def test_logs_directory_created():
     """El directorio de logs debe crearse automáticamente."""
     from src.utils.logger import get_logger
 
-    # Forzar la configuración del logger
     get_logger("test_dir")
     log_dir = os.path.dirname(os.getenv("LOG_FILE", "logs/drowsyguard.log"))
     assert os.path.isdir(log_dir)

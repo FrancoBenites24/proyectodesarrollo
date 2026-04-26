@@ -7,8 +7,6 @@ retornando None o 0.0 en lugar de lanzar excepciones.
 
 from __future__ import annotations
 
-import math
-
 import pytest
 
 from src.utils.calculations import Calculator
@@ -72,7 +70,6 @@ def test_ear_valid_returns_float():
 
 def test_ear_open_eye_above_threshold():
     """Ojos muy abiertos deben producir EAR > 0.25."""
-    # Ojo con altura máxima: puntos verticales muy separados
     left = (0, 0)
     right = (6, 0)
     top1 = (1, 4)
@@ -106,7 +103,6 @@ def test_mor_closed_mouth():
 
 def test_mor_open_mouth():
     """Boca abierta: altura grande → MOR > 0."""
-    # ancho = 4, altura = 2 → MOR = 0.5
     result = calc.mor(((0, 0), (2, 2), (4, 0), (2, -2)))
     assert result == pytest.approx(1.0)
 

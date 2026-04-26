@@ -1,7 +1,4 @@
 """Preprocesado de frames: resize, conversión de color, mejora de iluminación.
-
-Corrección del bug del repo original: ZeroDivisionError en enhance()
-cuando pixel_count es cero. Se usa luminance.size en el denominador.
 """
 
 from __future__ import annotations

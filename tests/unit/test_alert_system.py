@@ -2,8 +2,6 @@
 
 from unittest.mock import patch
 
-import pytest
-
 from src.alarm.alert_system import AlertSystem
 from src.core.temporal import AlertLevel, TemporalState
 

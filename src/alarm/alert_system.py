@@ -1,4 +1,5 @@
 """Sistema de alertas multi-canal con anti-rebote."""
+
 from __future__ import annotations
 
 import os
@@ -18,14 +19,14 @@ class AlertSystem:
     COOLDOWN_SECONDS = float(os.getenv("ALARM_COOLDOWN_SECONDS", "5"))
 
     _FREQUENCIES = {
-        AlertLevel.LOW:      440,
-        AlertLevel.HIGH:     880,
+        AlertLevel.LOW: 440,
+        AlertLevel.HIGH: 880,
         AlertLevel.CRITICAL: 1200,
     }
 
     _DURATIONS = {
-        AlertLevel.LOW:      0.5,
-        AlertLevel.HIGH:     1.0,
+        AlertLevel.LOW: 0.5,
+        AlertLevel.HIGH: 1.0,
         AlertLevel.CRITICAL: 2.0,
     }
 

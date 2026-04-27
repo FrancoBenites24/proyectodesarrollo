@@ -81,7 +81,10 @@ class AppState:
 
             # Guardar el frame anotado para el stream de video
             import cv2
-            out_frame = result.annotated_frame if result.annotated_frame is not None else frame
+
+            out_frame = (
+                result.annotated_frame if result.annotated_frame is not None else frame
+            )
             _, buffer = cv2.imencode(".jpg", out_frame)
             self.last_frame = buffer.tobytes()
 

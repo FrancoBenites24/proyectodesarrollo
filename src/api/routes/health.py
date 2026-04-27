@@ -1,6 +1,9 @@
 """Endpoint de salud."""
+
 import time
+
 from fastapi import APIRouter
+
 from src.api.schemas import SystemHealth
 from src.api.state import app_state
 

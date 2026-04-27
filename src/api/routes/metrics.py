@@ -1,5 +1,7 @@
 """Endpoint de métricas en tiempo real."""
+
 from fastapi import APIRouter
+
 from src.api.schemas import DrownsinessMetrics
 from src.api.state import app_state
 

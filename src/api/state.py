@@ -1,4 +1,5 @@
 """Estado global compartido entre endpoints (singleton)."""
+
 from __future__ import annotations
 
 import asyncio
@@ -6,10 +7,10 @@ import time
 from typing import Optional
 
 from src.api.schemas import AlertLevelSchema, DrownsinessMetrics
+from src.core.alert_system import AlertSystem
 from src.core.detector import DrowsinessDetector
 from src.core.temporal import TemporalAnalyzer
 from src.core.video_stream import VideoStream
-from src.core.alert_system import AlertSystem
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -21,9 +22,13 @@ class AppState:
         self.is_running = False
         self.camera_connected = False
         self.last_metrics = DrownsinessMetrics(
-            ear=0.0, mor=0.0, perclos=0.0,
+            ear=0.0,
+            mor=0.0,
+            perclos=0.0,
             alert_level=AlertLevelSchema.NONE,
-            face_detected=False, fps=0.0, timestamp=time.time(),
+            face_detected=False,
+            fps=0.0,
+            timestamp=time.time(),
         )
         self._task: Optional[asyncio.Task] = None
         self._stream: Optional[VideoStream] = None
@@ -74,10 +79,13 @@ class AppState:
             fps = frame_count / max(time.time() - t0, 1e-6)
 
             self.last_metrics = DrownsinessMetrics(
-                ear=result.ear, mor=result.mor, perclos=state.perclos,
+                ear=result.ear,
+                mor=result.mor,
+                perclos=state.perclos,
                 alert_level=AlertLevelSchema(int(state.alert_level)),
                 face_detected=result.face_detected,
-                fps=round(fps, 1), timestamp=result.timestamp,
+                fps=round(fps, 1),
+                timestamp=result.timestamp,
             )
             await asyncio.sleep(0)
 

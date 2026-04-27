@@ -1,4 +1,4 @@
-# Guía de Contribución — DrowsyGuard
+# Guía de Contribución — DriverDrowsGuard 
 
 ## Setup inicial
 

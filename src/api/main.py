@@ -1,0 +1,39 @@
+"""Aplicación FastAPI principal."""
+
+from __future__ import annotations
+
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from src.api.routes import health, metrics, stream
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("DrowsyGuard API iniciando")
+    yield
+    logger.info("DrowsyGuard API deteniendo")
+
+
+app = FastAPI(
+    title="DrowsyGuard API",
+    description="Sistema de detección de somnolencia en tiempo real",
+    version="2.0.0",
+    lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(health.router, tags=["Health"])
+app.include_router(stream.router, prefix="/stream", tags=["Stream"])
+app.include_router(metrics.router, prefix="/metrics", tags=["Metrics"])

@@ -1,11 +1,29 @@
 """Control del stream de video."""
 
+import asyncio
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 
 from src.api.schemas import StreamStartRequest
 from src.api.state import app_state
 
 router = APIRouter()
+
+
+@router.get("/video")
+async def video_feed():
+    async def frame_generator():
+        while True:
+            if app_state.last_frame:
+                yield (
+                    b"--frame\r\n"
+                    b"Content-Type: image/jpeg\r\n\r\n" + app_state.last_frame + b"\r\n"
+                )
+            await asyncio.sleep(0.03)  # ~30 FPS
+
+    return StreamingResponse(
+        frame_generator(), media_type="multipart/x-mixed-replace; boundary=frame"
+    )
 
 
 @router.post("/start", status_code=200)

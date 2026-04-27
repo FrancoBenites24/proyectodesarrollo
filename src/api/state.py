@@ -7,7 +7,7 @@ import time
 from typing import Optional
 
 from src.api.schemas import AlertLevelSchema, DrownsinessMetrics
-from src.core.alert_system import AlertSystem
+from src.alarm.alert_system import AlertSystem
 from src.core.detector import DrowsinessDetector
 from src.core.temporal import TemporalAnalyzer
 from src.core.video_stream import VideoStream
@@ -30,6 +30,7 @@ class AppState:
             fps=0.0,
             timestamp=time.time(),
         )
+        self.last_frame: Optional[bytes] = None
         self._task: Optional[asyncio.Task] = None
         self._stream: Optional[VideoStream] = None
 
@@ -77,6 +78,12 @@ class AppState:
 
             frame_count += 1
             fps = frame_count / max(time.time() - t0, 1e-6)
+
+            # Guardar el frame anotado para el stream de video
+            import cv2
+            out_frame = result.annotated_frame if result.annotated_frame is not None else frame
+            _, buffer = cv2.imencode(".jpg", out_frame)
+            self.last_frame = buffer.tobytes()
 
             self.last_metrics = DrownsinessMetrics(
                 ear=result.ear,

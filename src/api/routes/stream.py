@@ -1,6 +1,7 @@
 """Control del stream de video."""
 
 import asyncio
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 

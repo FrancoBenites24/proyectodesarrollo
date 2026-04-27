@@ -6,8 +6,8 @@ import asyncio
 import time
 from typing import Optional
 
-from src.api.schemas import AlertLevelSchema, DrownsinessMetrics
 from src.alarm.alert_system import AlertSystem
+from src.api.schemas import AlertLevelSchema, DrownsinessMetrics
 from src.core.detector import DrowsinessDetector
 from src.core.temporal import TemporalAnalyzer
 from src.core.video_stream import VideoStream

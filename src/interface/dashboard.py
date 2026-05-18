@@ -1,7 +1,7 @@
 # Dashboard principal de DrowsyGuard.
 # Interfaz en tiempo real para monitoreo de somnolencia del conductor.
 # Consume la API FastAPI en :8000 y refresca automáticamente.
-
+#correccion de verficaciones locales
 
 from __future__ import annotations
 

@@ -15,7 +15,7 @@ class AlertLevelSchema(IntEnum):
     CRITICAL = 3
 
 
-class DrownsinessMetrics(BaseModel):
+class DrowsinessMetrics(BaseModel):
     ear: float = Field(ge=0.0, le=1.0, description="Eye Aspect Ratio")
     mor: float = Field(ge=0.0, description="Mouth Open Ratio")
     perclos: float = Field(ge=0.0, le=1.0, description="% frames ojos cerrados")
@@ -29,7 +29,7 @@ class SystemHealth(BaseModel):
     status: Literal["ok", "degraded", "error"]
     camera_connected: bool
     uptime_seconds: float
-    version: str = "2.0.0"
+    version: str = "3.0.0"
 
 
 class StreamStartRequest(BaseModel):

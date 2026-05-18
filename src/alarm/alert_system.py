@@ -7,6 +7,7 @@ import threading
 import time
 from typing import Optional
 
+import httpx
 import numpy as np
 
 from src.core.temporal import AlertLevel, TemporalState
@@ -99,8 +100,6 @@ class AlertSystem:
 
     def _send_webhook(self, state: TemporalState) -> None:
         try:
-            import httpx
-
             payload = {
                 "alert_level": state.alert_level.name,
                 "perclos": state.perclos,
@@ -113,5 +112,5 @@ class AlertSystem:
                 f"Webhook enviado | nivel={state.alert_level.name} | "
                 f"status={response.status_code}"
             )
-        except Exception:
+        except httpx.HTTPError:
             logger.exception("Error al enviar webhook de alerta")

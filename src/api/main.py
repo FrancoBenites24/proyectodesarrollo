@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="DrowsyGuard API",
     description="Sistema de detección de somnolencia en tiempo real",
-    version="2.0.0",
+    version="3.0.0",
     lifespan=lifespan,
 )
 

@@ -79,7 +79,9 @@ class Enhancer(Preprocessor):
                 return self._equalize(rgb_frame)
 
         except Exception:
-            logger.exception("Error en mejora de iluminación — retornando frame original")
+            logger.exception(
+                "Error en mejora de iluminación — retornando frame original"
+            )
 
         return rgb_frame
 

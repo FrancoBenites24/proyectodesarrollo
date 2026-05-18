@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from enum import IntEnum
-from typing import Literal, Union
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -33,7 +33,7 @@ class SystemHealth(BaseModel):
 
 
 class StreamStartRequest(BaseModel):
-    source: Union[int, str] = Field(
+    source: int | str = Field(
         default=0,
-        description="Fuente de cámara: 0 para webcam, " "o ruta a archivo de video",
+        description="Fuente de cámara: 0 para webcam, o ruta a archivo de video",
     )

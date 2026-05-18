@@ -5,8 +5,6 @@ from __future__ import annotations
 import os
 import threading
 import time
-from typing import Optional
-
 import httpx
 import numpy as np
 
@@ -31,7 +29,7 @@ class AlertSystem:
         AlertLevel.CRITICAL: 2.0,
     }
 
-    def __init__(self, webhook_url: Optional[str] = None) -> None:
+    def __init__(self, webhook_url: str | None = None) -> None:
         self._webhook_url = webhook_url or os.getenv("ALARM_WEBHOOK_URL", "")
         self._last_alert_times: dict[AlertLevel, float] = {}
         self._lock = threading.Lock()

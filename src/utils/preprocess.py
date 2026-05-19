@@ -75,11 +75,13 @@ class Enhancer(Preprocessor):
             )
 
             if mean_lum < self.LUMINANCE_THRESHOLD:
-                logger.debug(f"Mejorando frame | " f"luminancia_media={mean_lum:.1f}")
+                logger.debug(f"Mejorando frame | luminancia_media={mean_lum:.1f}")
                 return self._equalize(rgb_frame)
 
         except Exception:
-            logger.exception("Error en mejora de iluminación")
+            logger.exception(
+                "Error en mejora de iluminación — retornando frame original"
+            )
 
         return rgb_frame
 

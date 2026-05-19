@@ -101,7 +101,7 @@ class HandsWrapper:
             min_detection_confidence=min_detection_confidence,
             min_tracking_confidence=min_tracking_confidence,
         )
-        logger.info("HandsWrapper inicializado | " f"max_hands={max_num_hands}")
+        logger.info(f"HandsWrapper inicializado | max_hands={max_num_hands}")
 
     def process(self, rgb_frame: np.ndarray):
         """Procesa un frame RGB y retorna landmarks de manos.

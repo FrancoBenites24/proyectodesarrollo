@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "drowsyguard"
-version = "2.0.0"
+version = "3.0.0"
 description = "Real-time driver drowsiness detection system"
 authors = ["DrowsyGuard Team <team@drowsyguard.dev>"]
 readme = "README.md"

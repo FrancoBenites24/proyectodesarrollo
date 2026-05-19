@@ -13,7 +13,6 @@ from __future__ import annotations
 import threading
 import time
 from queue import Empty, Full, Queue
-from typing import Optional, Union
 
 import cv2
 import numpy as np
@@ -38,7 +37,7 @@ class VideoStream:
 
     def __init__(
         self,
-        source: Union[int, str] = 0,
+        source: int | str = 0,
         buffer_size: int = 5,
     ) -> None:
         """Inicializa la captura de video.
@@ -82,7 +81,7 @@ class VideoStream:
         logger.info("Hilo de captura de video iniciado")
         return self
 
-    def read(self, timeout: float = 1.0) -> Optional[np.ndarray]:
+    def read(self, timeout: float = 1.0) -> np.ndarray | None:
         """Lee el frame más reciente disponible.
 
         Args:

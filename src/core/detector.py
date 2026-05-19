@@ -3,7 +3,7 @@
 Integra todos los utils del Issue #2 para producir un FrameResult
 con EAR, MOR y si el conductor tiene los ojos abiertos o está bostezando.
 
-Landmarks de referencia validados del repo original:
+Landmarks de referencia validados:
     left_eye:    (362, 385, 387, 263, 373, 380)
     right_eye:   (33, 160, 158, 133, 153, 144)
     lips:        (61, 17, 291, 0)
@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 import numpy as np
 
@@ -53,7 +52,7 @@ class FrameResult:
     eye_open: bool = True
     yawning: bool = False
     face_detected: bool = False
-    annotated_frame: Optional[np.ndarray] = None
+    annotated_frame: np.ndarray | None = None
     timestamp: float = field(default_factory=time.time)
 
 
@@ -81,7 +80,7 @@ class DrowsinessDetector:
 
     def __init__(
         self,
-        keypoints: Optional[dict[str, tuple[int, ...]]] = None,
+        keypoints: dict[str, tuple[int, ...]] | None = None,
         frame_size: tuple[int, int] = (480, 480),
         ear_threshold: float = 0.25,
         mor_threshold: float = 0.6,
@@ -154,7 +153,6 @@ class DrowsinessDetector:
                 result.annotated_frame = frame
                 return result
 
-            # ✅ NUNCA usar random — siempre el valor calculado real
             result.ear = round(min(ear_l, ear_r), 3)
             result.mor = round(self._calculator.mor(lips), 3)
             result.eye_open = result.ear > self._ear_threshold

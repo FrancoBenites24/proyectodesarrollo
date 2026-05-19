@@ -1,8 +1,22 @@
 name: Docker Build
 
+# Deshabilitado temporalmente hasta que el Dockerfile esté listo (Issue #6)
+# Se reactivará automáticamente cuando se mergee el PR del Issue #6
+
 on:
-  push:
-    branches: [main]
+  # Solo ejecución manual por el momento
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Razón para ejecutar manualmente'
+        required: false
+        default: 'Manual trigger'
+
+  # Se reactivará este trigger cuando el Dockerfile esté listo
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'Dockerfile'
 
 jobs:
   build:
@@ -11,7 +25,15 @@ jobs:
     permissions:
       contents: read
       packages: write
+
     steps:
+      - name: Check Dockerfile exists
+        run: |
+          if [ ! -f Dockerfile ]; then
+            echo "ERROR: Dockerfile not found. Complete Issue #6 first."
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
 
       - name: Log in to GitHub Container Registry
@@ -21,6 +43,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set lowercase repository name
+        id: lower
+        run: echo "repo=$(echo '${{ github.repository }}' | tr [:upper:] [:lower:])" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -28,7 +57,7 @@ jobs:
           target: runtime
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/${{ steps.lower.outputs.repo }}:latest
+            ghcr.io/${{ steps.lower.outputs.repo }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

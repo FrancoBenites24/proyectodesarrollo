@@ -35,24 +35,13 @@ DEFAULT_KEYPOINTS: dict[str, tuple[int, ...]] = {
 
 @dataclass
 class FrameResult:
-    """Resultado del procesamiento de un frame.
-
-    Attributes:
-        ear: Eye Aspect Ratio (0.0 = cerrado, ~0.3 = abierto).
-        mor: Mouth Open Ratio (> 0.6 indica bostezo).
-        eye_open: True si el EAR supera el umbral configurado.
-        yawning: True si el MOR supera el umbral configurado.
-        face_detected: True si Mediapipe detectó una cara en el frame.
-        annotated_frame: Frame con landmarks y métricas dibujados.
-        timestamp: Tiempo Unix del momento en que se procesó el frame.
-    """
-
     ear: float = 0.0
     mor: float = 0.0
     eye_open: bool = True
     yawning: bool = False
+    phone_detected: bool = False
     face_detected: bool = False
-    annotated_frame: np.ndarray | None = None
+    annotated_frame: Optional[np.ndarray] = None
     timestamp: float = field(default_factory=time.time)
 
 

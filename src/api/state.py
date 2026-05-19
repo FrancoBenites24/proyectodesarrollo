@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Optional
 
 import cv2
 
@@ -32,9 +31,9 @@ class AppState:
             fps=0.0,
             timestamp=time.time(),
         )
-        self.last_frame: Optional[bytes] = None
-        self._task: Optional[asyncio.Task] = None
-        self._stream: Optional[VideoStream] = None
+        self.last_frame: bytes | None = None
+        self._task: asyncio.Task | None = None
+        self._stream: VideoStream | None = None
 
     async def start(self, source: int | str = 0) -> None:
         try:

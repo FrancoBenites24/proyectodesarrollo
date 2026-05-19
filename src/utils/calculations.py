@@ -7,7 +7,6 @@ métricas de somnolencia a partir de landmarks faciales.
 from __future__ import annotations
 
 import math
-from typing import Optional
 
 from src.utils.logger import get_logger
 
@@ -45,7 +44,7 @@ class Calculator:
         """
         return ((p1[0] + p2[0]) // 2, (p1[1] + p2[1]) // 2)
 
-    def ear(self, points: tuple[Point, ...]) -> Optional[float]:
+    def ear(self, points: tuple[Point, ...]) -> float | None:
         """Eye Aspect Ratio. Retorna None si los puntos son inválidos.
 
         Calcula la relación de aspecto del ojo usando 6 landmarks:

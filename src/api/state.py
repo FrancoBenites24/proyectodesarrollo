@@ -24,17 +24,17 @@ class AppState:
         self.is_running = False
         self.camera_connected = False
         self.last_metrics = DrowsinessMetrics(
-            ear=0.0,
-            mor=0.0,
-            perclos=0.0,
-            alert_level=AlertLevelSchema.NONE,
-            face_detected=False,
-            fps=0.0,
-            timestamp=time.time(),
+            ear=result.ear,
+            mor=result.mor,
+            perclos=state.perclos,
+            alert_level=AlertLevelSchema(
+                int(state.alert_level)
+            ),
+            phone_detected=result.phone_detected,
+            face_detected=result.face_detected,
+            fps=round(fps, 1),
+            timestamp=result.timestamp,
         )
-        self.last_frame: Optional[bytes] = None
-        self._task: Optional[asyncio.Task] = None
-        self._stream: Optional[VideoStream] = None
 
     async def start(self, source: int | str = 0) -> None:
         try:

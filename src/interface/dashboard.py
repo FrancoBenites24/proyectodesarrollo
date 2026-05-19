@@ -1,25 +1,25 @@
 """Dashboard principal de DrowsyGuard.
- 
+
 Interfaz en tiempo real para monitoreo de somnolencia del conductor.
 Consume la API FastAPI en :8000 y refresca automáticamente.
 """
- 
+
 from __future__ import annotations
- 
+
 import time
 from collections import deque
 from typing import Any
- 
+
 import httpx
 import plotly.graph_objects as go
 import streamlit as st
- 
+
 # ── Configuración ─────────────────────────────────────────────────────────────
- 
+
 API_BASE = "http://localhost:8000"
 REFRESH_INTERVAL = 0.5
 HISTORY_SIZE = 60
- 
+
 ALERT_NAMES = {0: "NONE", 1: "LOW", 2: "HIGH", 3: "CRITICAL"}
 ALERT_ICONS = {0: "✅", 1: "⚠️", 2: "🔶", 3: "🚨"}
 ALERT_COLORS = {
@@ -28,13 +28,13 @@ ALERT_COLORS = {
     2: "#f97316",
     3: "#ef4444",
 }
- 
+
 # ── Helpers de API ────────────────────────────────────────────────────────────
- 
- 
+
+
 def fetch_metrics() -> dict[str, Any]:
     """Obtiene métricas actuales desde la API.
- 
+
     Returns:
         Diccionario con ear, mor, perclos, alert_level, face_detected,
         fps, timestamp — o dict vacío si la API no responde.
@@ -45,11 +45,11 @@ def fetch_metrics() -> dict[str, Any]:
         return r.json()
     except Exception:
         return {}
- 
- 
+
+
 def fetch_health() -> dict[str, Any]:
     """Obtiene el estado de salud del sistema.
- 
+
     Returns:
         Diccionario con status, camera_connected, uptime_seconds, version.
     """
@@ -59,14 +59,14 @@ def fetch_health() -> dict[str, Any]:
         return r.json()
     except Exception:
         return {}
- 
- 
+
+
 def start_stream(source: int | str = 0) -> bool:
     """Envía orden de inicio del stream a la API.
- 
+
     Args:
         source: índice de cámara (int) o ruta de video (str).
- 
+
     Returns:
         True si la solicitud fue exitosa.
     """
@@ -79,11 +79,11 @@ def start_stream(source: int | str = 0) -> bool:
         return r.status_code == 200
     except Exception:
         return False
- 
- 
+
+
 def stop_stream() -> bool:
     """Envía orden de parada del stream a la API.
- 
+
     Returns:
         True si la solicitud fue exitosa.
     """
@@ -92,11 +92,11 @@ def stop_stream() -> bool:
         return r.status_code == 200
     except Exception:
         return False
- 
- 
+
+
 # ── Inicialización de estado de sesión ───────────────────────────────────────
- 
- 
+
+
 def _init_session_state() -> None:
     """Inicializa variables de estado de la sesión si no existen."""
     if "ear_history" not in st.session_state:
@@ -107,11 +107,11 @@ def _init_session_state() -> None:
         st.session_state.time_history: deque[float] = deque(maxlen=HISTORY_SIZE)
     if "stream_active" not in st.session_state:
         st.session_state.stream_active = False
- 
- 
+
+
 # ── Componentes de UI ─────────────────────────────────────────────────────────
- 
- 
+
+
 def render_page_config() -> None:
     """Configura la página y los estilos globales."""
     st.set_page_config(
@@ -157,20 +157,20 @@ def render_page_config() -> None:
         """,
         unsafe_allow_html=True,
     )
- 
- 
+
+
 def render_sidebar(health: dict[str, Any]) -> tuple[bool, int | str]:
     """Renderiza el panel lateral con controles y estado del sistema.
- 
+
     Args:
         health: Diccionario de salud retornado por la API.
- 
+
     Returns:
         Tupla (auto_refresh, source) con las preferencias del usuario.
     """
     with st.sidebar:
         st.markdown("## ⚙️ Control")
- 
+
         api_ok = bool(health)
         status_color = "#22c55e" if api_ok else "#ef4444"
         status_text = "API conectada" if api_ok else "API sin respuesta"
@@ -178,7 +178,7 @@ def render_sidebar(health: dict[str, Any]) -> tuple[bool, int | str]:
             f'<span style="color:{status_color}">● {status_text}</span>',
             unsafe_allow_html=True,
         )
- 
+
         if api_ok:
             cam_ok = health.get("camera_connected", False)
             cam_color = "#22c55e" if cam_ok else "#facc15"
@@ -188,12 +188,10 @@ def render_sidebar(health: dict[str, Any]) -> tuple[bool, int | str]:
                 unsafe_allow_html=True,
             )
             uptime = health.get("uptime_seconds", 0)
-            st.caption(
-                f"Uptime: {uptime:.0f} s  |  v{health.get('version', '?')}"
-            )
- 
+            st.caption(f"Uptime: {uptime:.0f} s  |  v{health.get('version', '?')}")
+
         st.divider()
- 
+
         source_input = st.text_input(
             "Fuente de cámara",
             value="0",
@@ -203,7 +201,7 @@ def render_sidebar(health: dict[str, Any]) -> tuple[bool, int | str]:
             source: int | str = int(source_input)
         except ValueError:
             source = source_input
- 
+
         col_a, col_b = st.columns(2)
         with col_a:
             if st.button("▶ Iniciar", use_container_width=True, type="primary"):
@@ -219,12 +217,12 @@ def render_sidebar(health: dict[str, Any]) -> tuple[bool, int | str]:
                     st.success("Stream detenido")
                 else:
                     st.error("No se pudo detener")
- 
+
         st.divider()
         st.markdown("### 🔄 Refresco")
         auto_refresh = st.toggle("Auto-refresco", value=True)
         st.caption(f"Intervalo: {REFRESH_INTERVAL} s")
- 
+
         st.divider()
         st.markdown("### 📋 Leyenda PERCLOS")
         st.markdown(
@@ -237,13 +235,13 @@ def render_sidebar(health: dict[str, Any]) -> tuple[bool, int | str]:
             | 🚨 Crítico | > 60% |
             """
         )
- 
+
         return auto_refresh, source  # type: ignore[return-value]
- 
- 
+
+
 def render_alert_banner(alert_level: int, face_detected: bool) -> None:
     """Muestra banner de alerta con color y animación según el nivel.
- 
+
     Args:
         alert_level: 0-3 según AlertLevelSchema.
         face_detected: True si hay cara detectada en el frame actual.
@@ -251,7 +249,7 @@ def render_alert_banner(alert_level: int, face_detected: bool) -> None:
     if not face_detected:
         st.warning("👤 Sin rostro detectado — posiciona la cámara correctamente")
         return
- 
+
     alert_name = ALERT_NAMES.get(alert_level, "NONE")
     icon = ALERT_ICONS.get(alert_level, "✅")
     st.markdown(
@@ -259,11 +257,11 @@ def render_alert_banner(alert_level: int, face_detected: bool) -> None:
         unsafe_allow_html=True,
     )
     st.write("")
- 
- 
+
+
 def render_metric_cards(data: dict[str, Any]) -> None:
     """Renderiza las tarjetas de métricas principales.
- 
+
     Args:
         data: Diccionario de métricas retornado por la API.
     """
@@ -271,7 +269,7 @@ def render_metric_cards(data: dict[str, Any]) -> None:
     mor = data.get("mor", 0.0)
     perclos = data.get("perclos", 0.0)
     fps = data.get("fps", 0.0)
- 
+
     col1, col2, col3, col4 = st.columns(4)
     col1.metric(
         label="👁️ EAR",
@@ -297,11 +295,11 @@ def render_metric_cards(data: dict[str, Any]) -> None:
         delta="en vivo" if fps > 0 else "detenido",
         delta_color="normal" if fps > 0 else "off",
     )
- 
- 
+
+
 def render_perclos_gauge(perclos: float, alert_level: int) -> None:
     """Renderiza el gauge circular de PERCLOS.
- 
+
     Args:
         perclos: Valor de PERCLOS entre 0 y 1.
         alert_level: Nivel de alerta para el color del gauge.
@@ -330,15 +328,15 @@ def render_perclos_gauge(perclos: float, alert_level: int) -> None:
         margin={"t": 30, "b": 10, "l": 20, "r": 20},
     )
     st.plotly_chart(fig, use_container_width=True, key="gauge")
- 
- 
+
+
 def render_history_chart(
     ear_history: deque[float],
     perclos_history: deque[float],
     time_history: deque[float],
 ) -> None:
     """Renderiza el gráfico de histórico EAR y PERCLOS con Plotly.
- 
+
     Args:
         ear_history: Cola circular con valores de EAR.
         perclos_history: Cola circular con valores de PERCLOS.
@@ -347,10 +345,10 @@ def render_history_chart(
     if not time_history:
         st.info("El gráfico aparecerá cuando el stream esté activo.")
         return
- 
+
     t = list(time_history)
     t_rel = [round(ti - t[0], 1) for ti in t]
- 
+
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
@@ -410,35 +408,35 @@ def render_history_chart(
         font={"color": "#94a3b8"},
     )
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
- 
- 
+
+
 # ── Página principal ──────────────────────────────────────────────────────────
- 
- 
+
+
 def main() -> None:
     """Punto de entrada del dashboard DrowsyGuard."""
     render_page_config()
     _init_session_state()
- 
+
     st.markdown("# 🚗 DrowsyGuard Monitor")
     st.caption("Sistema de detección de somnolencia en tiempo real")
- 
+
     health = fetch_health()
     auto_refresh, source = render_sidebar(health)
- 
+
     data = fetch_metrics()
     alert_level = data.get("alert_level", 0)
     face_detected = data.get("face_detected", False)
- 
+
     if data:
         st.session_state.ear_history.append(data.get("ear", 0.0))
         st.session_state.perclos_history.append(data.get("perclos", 0.0))
         st.session_state.time_history.append(data.get("timestamp", time.time()))
- 
+
     render_alert_banner(alert_level, face_detected)
- 
+
     col_video, col_right = st.columns([3, 2], gap="large")
- 
+
     with col_video:
         st.subheader("📷 Video en vivo")
         if st.session_state.stream_active:
@@ -448,10 +446,8 @@ def main() -> None:
                 caption="Stream MJPEG — actualiza automáticamente",
             )
         else:
-            st.info(
-                "▶ Pulsa **Iniciar** en el panel lateral para activar la cámara."
-            )
- 
+            st.info("▶ Pulsa **Iniciar** en el panel lateral para activar la cámara.")
+
     with col_right:
         st.subheader("📊 Métricas actuales")
         if data:
@@ -459,18 +455,18 @@ def main() -> None:
             render_perclos_gauge(data.get("perclos", 0.0), alert_level)
         else:
             st.warning("Sin datos — verifica que la API esté corriendo en :8000")
- 
+
     st.divider()
     render_history_chart(
         st.session_state.ear_history,
         st.session_state.perclos_history,
         st.session_state.time_history,
     )
- 
+
     if auto_refresh:
         time.sleep(REFRESH_INTERVAL)
         st.rerun()
- 
- 
+
+
 if __name__ == "__main__":
     main()

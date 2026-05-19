@@ -145,7 +145,7 @@ with col_metrics:
     m1, m2 = st.columns(2)
     m1.metric("👁 EAR", f"{data.get('ear', 0):.3f}")
     m2.metric("📊 PERCLOS", f"{data.get('perclos', 0):.1%}")
-    
+
     m3, m4 = st.columns(2)
     m3.metric("👄 MOR", f"{data.get('mor', 0):.3f}")
     m4.metric("🎯 FPS", f"{data.get('fps', 0):.0f}")
@@ -169,7 +169,10 @@ with col_metrics:
         )
     )
     fig_gauge.update_layout(
-        paper_bgcolor="#0d1117", font_color="#e6edf3", height=220, margin=dict(t=30, b=10, l=20, r=20)
+        paper_bgcolor="#0d1117",
+        font_color="#e6edf3",
+        height=220,
+        margin=dict(t=30, b=10, l=20, r=20),
     )
     st.plotly_chart(fig_gauge, use_container_width=True, key="gauge")
 
@@ -177,9 +180,24 @@ st.divider()
 
 # ── Gráfico histórico EAR ──────────────────────────────
 fig_ear = go.Figure()
-fig_ear.add_trace(go.Scatter(y=list(st.session_state.ear_history), mode="lines", name="EAR", line=dict(color="#58a6ff", width=2)))
+fig_ear.add_trace(
+    go.Scatter(
+        y=list(st.session_state.ear_history),
+        mode="lines",
+        name="EAR",
+        line=dict(color="#58a6ff", width=2),
+    )
+)
 fig_ear.add_hline(y=0.25, line_dash="dash", line_color="#f85149")
-fig_ear.update_layout(title="📈 Historial EAR", paper_bgcolor="#0d1117", plot_bgcolor="#161b22", font_color="#e6edf3", height=180, margin=dict(t=40, b=20, l=20, r=20), yaxis=dict(range=[0, 0.6]))
+fig_ear.update_layout(
+    title="📈 Historial EAR",
+    paper_bgcolor="#0d1117",
+    plot_bgcolor="#161b22",
+    font_color="#e6edf3",
+    height=180,
+    margin=dict(t=40, b=20, l=20, r=20),
+    yaxis=dict(range=[0, 0.6]),
+)
 st.plotly_chart(fig_ear, use_container_width=True)
 
 # Auto-update

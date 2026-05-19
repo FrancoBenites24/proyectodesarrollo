@@ -1,0 +1,353 @@
+## 📋 Descripción
+Implementar la API FastAPI completa con endpoints de salud, métricas y control del stream. Esta es la capa que conecta el motor de detección con el dashboard.
+
+**⚠️ Dependencias:** Issues #1, #2, #3, #4, #5 mergeados en `develop`.
+
+## 👤 Asignado a
+@J0rge08 
+## 🌿 Branch
+```
+feat/7-fastapi
+```
+&gt; Crear desde `develop`: `git checkout develop &amp;&amp; git pull &amp;&amp; git checkout -b feat/7-fastapi`
+
+---
+
+## 🤖 Plan de Implementación
+
+### Estructura a crear
+```
+src/api/
+├── __init__.py       (ya existe)
+├── main.py           ← punto de entrada
+├── state.py          ← estado global compartido
+├── schemas.py        ← modelos Pydantic v2
+└── routes/
+    ├── __init__.py   (ya existe)
+    ├── health.py     ← GET /health
+    ├── metrics.py    ← GET /metrics/
+    └── stream.py     ← POST /stream/start, /stream/stop
+```
+
+### Paso 1 — `src/api/schemas.py`
+```python
+&#34;&#34;&#34;Schemas Pydantic v2 para request/response de la API.&#34;&#34;&#34;
+from __future__ import annotations
+
+from enum import IntEnum
+from typing import Literal, Union
+
+from pydantic import BaseModel, Field
+
+
+class AlertLevelSchema(IntEnum):
+    NONE = 0
+    LOW = 1
+    HIGH = 2
+    CRITICAL = 3
+
+
+class DrownsinessMetrics(BaseModel):
+    &#34;&#34;&#34;Métricas actuales del sistema de detección.&#34;&#34;&#34;
+
+    ear: float = Field(ge=0.0, le=1.0, description=&#34;Eye Aspect Ratio&#34;)
+    mor: float = Field(ge=0.0, description=&#34;Mouth Open Ratio&#34;)
+    perclos: float = Field(ge=0.0, le=1.0, description=&#34;% frames ojos cerrados&#34;)
+    alert_level: AlertLevelSchema
+    face_detected: bool
+    fps: float = Field(ge=0.0)
+    timestamp: float
+
+
+class SystemHealth(BaseModel):
+    &#34;&#34;&#34;Estado de salud del sistema.&#34;&#34;&#34;
+
+    status: Literal[&#34;ok&#34;, &#34;degraded&#34;, &#34;error&#34;]
+    camera_connected: bool
+    uptime_seconds: float
+    version: str = &#34;2.0.0&#34;
+
+
+class StreamStartRequest(BaseModel):
+    &#34;&#34;&#34;Parámetros para iniciar el stream.&#34;&#34;&#34;
+
+    source: Union[int, str] = Field(
+        default=0,
+        description=&#34;Fuente de cámara: 0 para webcam, o ruta a archivo de video&#34;,
+    )
+```
+
+### Paso 2 — `src/api/state.py`
+```python
+&#34;&#34;&#34;Estado global compartido entre endpoints (singleton).&#34;&#34;&#34;
+from __future__ import annotations
+
+import asyncio
+import time
+from typing import Optional
+
+from src.api.schemas import AlertLevelSchema, DrownsinessMetrics
+from src.core.detector import DrowsinessDetector
+from src.core.temporal import TemporalAnalyzer
+from src.core.video_stream import VideoStream
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+class AppState:
+    &#34;&#34;&#34;Estado global de la aplicación.&#34;&#34;&#34;
+
+    def __init__(self) -&gt; None:
+        self.start_time = time.time()
+        self.is_running = False
+        self.camera_connected = False
+        self.last_metrics = DrownsinessMetrics(
+            ear=0.0,
+            mor=0.0,
+            perclos=0.0,
+            alert_level=AlertLevelSchema.NONE,
+            face_detected=False,
+            fps=0.0,
+            timestamp=time.time(),
+        )
+        self._task: Optional[asyncio.Task] = None
+        self._stream: Optional[VideoStream] = None
+
+    async def start(self, source: int | str = 0) -&gt; None:
+        &#34;&#34;&#34;Inicia el stream y el loop de detección.&#34;&#34;&#34;
+        try:
+            self._stream = VideoStream(source=source).start()
+            self.camera_connected = True
+            self.is_running = True
+            self._task = asyncio.create_task(self._detection_loop())
+            logger.info(f&#34;Detección iniciada | source={source}&#34;)
+        except RuntimeError:
+            logger.exception(&#34;No se pudo iniciar el stream de video&#34;)
+            raise
+
+    async def stop(self) -&gt; None:
+        &#34;&#34;&#34;Detiene el stream y el loop de detección.&#34;&#34;&#34;
+        self.is_running = False
+        if self._task:
+            self._task.cancel()
+            try:
+                await self._task
+            except asyncio.CancelledError:
+                pass
+        if self._stream:
+            self._stream.stop()
+        self.camera_connected = False
+        logger.info(&#34;Detección detenida&#34;)
+
+    async def _detection_loop(self) -&gt; None:
+        &#34;&#34;&#34;Loop principal: captura → detecta → actualiza métricas.&#34;&#34;&#34;
+        detector = DrowsinessDetector()
+        analyzer = TemporalAnalyzer()
+        frame_count = 0
+        t0 = time.time()
+
+        while self.is_running:
+            frame = self._stream.read(timeout=0.1)
+            if frame is None:
+                await asyncio.sleep(0.01)
+                continue
+
+            result = detector.process(frame)
+            state = analyzer.update(result.eye_open)
+
+            frame_count += 1
+            fps = frame_count / max(time.time() - t0, 1e-6)
+
+            self.last_metrics = DrownsinessMetrics(
+                ear=result.ear,
+                mor=result.mor,
+                perclos=state.perclos,
+                alert_level=AlertLevelSchema(int(state.alert_level)),
+                face_detected=result.face_detected,
+                fps=round(fps, 1),
+                timestamp=result.timestamp,
+            )
+            await asyncio.sleep(0)  # Yield para no bloquear el event loop
+
+
+# Singleton — una sola instancia para toda la app
+app_state = AppState()
+```
+
+### Paso 3 — Routes
+
+**`src/api/routes/health.py`**
+```python
+&#34;&#34;&#34;Endpoint de salud.&#34;&#34;&#34;
+import time
+from fastapi import APIRouter
+from src.api.schemas import SystemHealth
+from src.api.state import app_state
+
+router = APIRouter()
+
+
+@router.get(&#34;/health&#34;, response_model=SystemHealth)
+async def health_check() -&gt; SystemHealth:
+    &#34;&#34;&#34;Retorna el estado de salud del sistema.&#34;&#34;&#34;
+    return SystemHealth(
+        status=&#34;ok&#34; if app_state.camera_connected else &#34;degraded&#34;,
+        camera_connected=app_state.camera_connected,
+        uptime_seconds=round(time.time() - app_state.start_time, 1),
+    )
+```
+
+**`src/api/routes/metrics.py`**
+```python
+&#34;&#34;&#34;Endpoint de métricas en tiempo real.&#34;&#34;&#34;
+from fastapi import APIRouter
+from src.api.schemas import DrownsinessMetrics
+from src.api.state import app_state
+
+router = APIRouter()
+
+
+@router.get(&#34;/&#34;, response_model=DrownsinessMetrics)
+async def get_metrics() -&gt; DrownsinessMetrics:
+    &#34;&#34;&#34;Retorna las métricas más recientes del sistema de detección.&#34;&#34;&#34;
+    return app_state.last_metrics
+```
+
+**`src/api/routes/stream.py`**
+```python
+&#34;&#34;&#34;Control del stream de video.&#34;&#34;&#34;
+from fastapi import APIRouter, HTTPException
+from src.api.schemas import StreamStartRequest
+from src.api.state import app_state
+
+router = APIRouter()
+
+
+@router.post(&#34;/start&#34;, status_code=200)
+async def start_stream(body: StreamStartRequest):
+    &#34;&#34;&#34;Inicia el stream de detección.&#34;&#34;&#34;
+    if app_state.is_running:
+        raise HTTPException(status_code=409, detail=&#34;El stream ya está corriendo&#34;)
+    await app_state.start(source=body.source)
+    return {&#34;status&#34;: &#34;started&#34;, &#34;source&#34;: body.source}
+
+
+@router.post(&#34;/stop&#34;, status_code=200)
+async def stop_stream():
+    &#34;&#34;&#34;Detiene el stream de detección.&#34;&#34;&#34;
+    if not app_state.is_running:
+        raise HTTPException(status_code=409, detail=&#34;El stream no está corriendo&#34;)
+    await app_state.stop()
+    return {&#34;status&#34;: &#34;stopped&#34;}
+```
+
+### Paso 4 — `src/api/main.py`
+```python
+&#34;&#34;&#34;Aplicación FastAPI principal.&#34;&#34;&#34;
+from __future__ import annotations
+
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from src.api.routes import health, metrics, stream
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info(&#34;DrowsyGuard API iniciando&#34;)
+    yield
+    logger.info(&#34;DrowsyGuard API deteniendo&#34;)
+
+
+app = FastAPI(
+    title=&#34;DrowsyGuard API&#34;,
+    description=&#34;Sistema de detección de somnolencia en tiempo real&#34;,
+    version=&#34;2.0.0&#34;,
+    lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[&#34;*&#34;],
+    allow_methods=[&#34;*&#34;],
+    allow_headers=[&#34;*&#34;],
+)
+
+app.include_router(health.router, tags=[&#34;Health&#34;])
+app.include_router(stream.router, prefix=&#34;/stream&#34;, tags=[&#34;Stream&#34;])
+app.include_router(metrics.router, prefix=&#34;/metrics&#34;, tags=[&#34;Metrics&#34;])
+```
+
+### Paso 5 — Tests de integración `tests/integration/test_api.py`
+```python
+&#34;&#34;&#34;Tests de integración para la API FastAPI.&#34;&#34;&#34;
+from fastapi.testclient import TestClient
+from src.api.main import app
+
+client = TestClient(app)
+
+
+def test_health_returns_200():
+    r = client.get(&#34;/health&#34;)
+    assert r.status_code == 200
+
+
+def test_health_schema():
+    r = client.get(&#34;/health&#34;)
+    data = r.json()
+    assert &#34;status&#34; in data
+    assert &#34;camera_connected&#34; in data
+    assert &#34;uptime_seconds&#34; in data
+
+
+def test_metrics_returns_200():
+    r = client.get(&#34;/metrics/&#34;)
+    assert r.status_code == 200
+
+
+def test_metrics_schema():
+    r = client.get(&#34;/metrics/&#34;)
+    data = r.json()
+    for field in [&#34;ear&#34;, &#34;mor&#34;, &#34;perclos&#34;, &#34;alert_level&#34;, &#34;fps&#34;]:
+        assert field in data
+
+
+def test_stop_without_start_returns_409():
+    r = client.post(&#34;/stream/stop&#34;)
+    assert r.status_code == 409
+
+
+def test_docs_available():
+    r = client.get(&#34;/docs&#34;)
+    assert r.status_code == 200
+```
+
+### Paso 6 — Ejecutar y verificar
+```bash
+# Correr la API
+poetry run uvicorn src.api.main:app --reload
+
+# En otra terminal, probar endpoints
+curl http://localhost:8000/health
+curl http://localhost:8000/metrics/
+
+# Tests
+poetry run pytest tests/integration/test_api.py -v
+```
+
+---
+
+## ✅ Criterios de Aceptación
+- [x] `GET /health` retorna `SystemHealth` con status 200
+- [x] `GET /metrics/` retorna `DrownsinessMetrics` con status 200
+- [x] `POST /stream/start` retorna 409 si ya está corriendo
+- [x] `POST /stream/stop` retorna 409 si no está corriendo
+- [x] Docs en `http://localhost:8000/docs` muestran todos los endpoints
+- [x] Tests de integración pasan (5/5)
+- [x] `black`, `isort`, `flake8` sin errores

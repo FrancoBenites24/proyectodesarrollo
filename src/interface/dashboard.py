@@ -1,8 +1,6 @@
-
 # Dashboard principal de DrowsyGuard.
 # Interfaz en tiempo real para monitoreo de somnolencia del conductor.
 # Consume la API FastAPI en :8000 y refresca automáticamente.
-#correccion de verficaciones locales
 
 from __future__ import annotations
 
@@ -202,6 +200,40 @@ def render_metric_cards(data: dict[str, Any]) -> None:
     )
 
 
+def render_gauge_chart(perclos: float, alert_level: int) -> None:
+    """Renderiza el gráfico de gauge para PERCLOS.
+
+    Args:
+        perclos: Valor de PERCLOS.
+        alert_level: Nivel de alerta para determinar el color de la barra.
+    """
+    color, _, _ = ALERT_COLORS.get(alert_level, ALERT_COLORS[0])
+    fig_gauge = go.Figure(
+        go.Indicator(
+            mode="gauge+number",
+            value=round(perclos * 100, 1),
+            number={"suffix": "%", "font": {"color": "#e6edf3", "size": 28}},
+            gauge={
+                "axis": {"range": [0, 100], "tickcolor": "#e6edf3"},
+                "bar": {"color": color},
+                "bgcolor": "#161b22",
+                "steps": [
+                    {"range": [0, 20], "color": "#0d1117"},
+                    {"range": [20, 40], "color": "#1a2020"},
+                    {"range": [40, 100], "color": "#2d1010"},
+                ],
+            },
+        )
+    )
+    fig_gauge.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        font_color="#e6edf3",
+        height=200,
+        margin=dict(t=30, b=10, l=20, r=20),
+    )
+    st.plotly_chart(fig_gauge, use_container_width=True, key="gauge")
+
+
 def render_history_chart(
     ear_history: deque[float],
     perclos_history: deque[float],
@@ -389,17 +421,19 @@ def main() -> None:
         initial_sidebar_state="expanded",
     )
 
-    # CSS mínimo para oscurecer el fondo y mejorar contraste
+    # CSS personalizado con fondo oscuro premium y bordes redondeados
     st.markdown(
         """
         <style>
-        .block-container { padding-top: 1.5rem; }
-        [data-testid="metric-container"] {
-            background: #0f172a;
-            border: 1px solid #1e293b;
-            border-radius: 12px;
-            padding: 16px !important;
-        }
+            .stApp { background-color: #0d1117; color: #e6edf3; }
+            .block-container { padding-top: 1.5rem; }
+            .metric-value { font-size: 2.5rem !important; font-weight: 700; }
+            div[data-testid="metric-container"] {
+                background: #161b22;
+                border: 1px solid #30363d;
+                border-radius: 12px;
+                padding: 16px !important;
+            }
         </style>
         """,
         unsafe_allow_html=True,
@@ -450,6 +484,8 @@ def main() -> None:
         st.subheader("📊 Métricas actuales")
         if data:
             render_metric_cards(data)
+            st.markdown("#### ⭕ Indicador PERCLOS")
+            render_gauge_chart(data.get("perclos", 0.0), alert_level)
         else:
             st.warning("Sin datos — verifica que la API esté corriendo en :8000")
 
@@ -468,79 +504,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-=======
-"""Dashboard Streamlit para monitoreo de somnolencia en tiempo real."""
-
-import os
-
-import httpx
-import streamlit as st
-
-API_BASE = os.getenv("API_URL", "http://localhost:8000")
-
-st.set_page_config(page_title="DrowsyGuard", layout="wide")
-
-st.title("🚗 DrowsyGuard Monitor")
-
-
-def fetch_metrics() -> dict:
-    """Obtiene las métricas actuales desde la API.
-
-    Returns:
-        Diccionario con métricas (ear, mor, perclos, fps, etc.).
-        Retorna un dict vacío si la API no está disponible.
-    """
-    try:
-        r = httpx.get(f"{API_BASE}/metrics/", timeout=2.0)
-        r.raise_for_status()
-        return r.json()
-    except httpx.HTTPError:
-        return {}
-
-
-def start_stream() -> None:
-    """Envía la señal de inicio del stream a la API."""
-    try:
-        httpx.post(f"{API_BASE}/stream/start", timeout=5.0)
-    except httpx.HTTPError:
-        st.error("No se pudo conectar con la API para iniciar el stream.")
-
-
-def stop_stream() -> None:
-    """Envía la señal de detención del stream a la API."""
-    try:
-        httpx.post(f"{API_BASE}/stream/stop", timeout=5.0)
-    except httpx.HTTPError:
-        st.error("No se pudo conectar con la API para detener el stream.")
-
-
-# ── Botones de control ────────────────────────────────────────────────────────
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("▶ Iniciar"):
-        start_stream()
-
-with col2:
-    if st.button("⏹ Detener"):
-        stop_stream()
-
-st.divider()
-
-# ── Cámara ────────────────────────────────────────────────────────────────────
-st.subheader("📷 Cámara")
-st.image(f"{API_BASE}/stream/video")
-
-st.divider()
-
-# ── Métricas ──────────────────────────────────────────────────────────────────
-data = fetch_metrics()
-
-st.subheader("📊 Métricas")
-col1, col2 = st.columns(2)
-col1.metric("EAR", f"{data.get('ear', 0):.3f}")
-col2.metric("PERCLOS", f"{data.get('perclos', 0):.1%}")
-
-col3, col4 = st.columns(2)
-col3.metric("MOR", f"{data.get('mor', 0):.3f}")
-col4.metric("FPS", f"{data.get('fps', 0):.0f}")
-

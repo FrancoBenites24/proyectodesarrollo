@@ -6,8 +6,10 @@ import asyncio
 import time
 from typing import Optional
 
+import cv2
+
 from src.alarm.alert_system import AlertSystem
-from src.api.schemas import AlertLevelSchema, DrownsinessMetrics
+from src.api.schemas import AlertLevelSchema, DrowsinessMetrics
 from src.core.detector import DrowsinessDetector
 from src.core.temporal import TemporalAnalyzer
 from src.core.video_stream import VideoStream
@@ -21,7 +23,7 @@ class AppState:
         self.start_time = time.time()
         self.is_running = False
         self.camera_connected = False
-        self.last_metrics = DrownsinessMetrics(
+        self.last_metrics = DrowsinessMetrics(
             ear=0.0,
             mor=0.0,
             perclos=0.0,
@@ -80,15 +82,13 @@ class AppState:
             fps = frame_count / max(time.time() - t0, 1e-6)
 
             # Guardar el frame anotado para el stream de video
-            import cv2
-
             out_frame = (
                 result.annotated_frame if result.annotated_frame is not None else frame
             )
             _, buffer = cv2.imencode(".jpg", out_frame)
             self.last_frame = buffer.tobytes()
 
-            self.last_metrics = DrownsinessMetrics(
+            self.last_metrics = DrowsinessMetrics(
                 ear=result.ear,
                 mor=result.mor,
                 perclos=state.perclos,

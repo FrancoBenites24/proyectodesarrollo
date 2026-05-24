@@ -1,1 +1,1 @@
-"""Dashboard interface."""
+"""Interfaz Streamlit de DrowsyGuard."""

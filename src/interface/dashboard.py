@@ -1,5 +1,4 @@
 """Dashboard principal de DrowsyGuard.
- 
 Interfaz en tiempo real para monitoreo de somnolencia del conductor.
 Consume la API FastAPI en :8000 y refresca automáticamente.
 """

@@ -31,36 +31,25 @@ class Drawer:
         ear: float,
         mor: float,
         eye_open: bool,
+        phone_detected: bool = False,
     ) -> np.ndarray:
-        """Dibuja landmarks y muestra EAR/MOR en el frame.
+        """Dibuja landmarks y métricas."""
 
-        Args:
-            frame: Frame BGR de OpenCV a anotar.
-            left_eye: Puntos del ojo izquierdo.
-            right_eye: Puntos del ojo derecho.
-            lips: Puntos de los labios.
-            ear: Valor de Eye Aspect Ratio.
-            mor: Valor de Mouth Open Ratio.
-            eye_open: True si los ojos están abiertos.
-
-        Returns:
-            Frame anotado con landmarks y métricas.
-        """
         color = GREEN if eye_open else RED
 
-        # Dibujar puntos del ojo izquierdo
+        # Ojo izquierdo
         for pt in left_eye:
             cv2.circle(frame, pt, 2, color, -1)
 
-        # Dibujar puntos del ojo derecho
+        # Ojo derecho
         for pt in right_eye:
             cv2.circle(frame, pt, 2, color, -1)
 
-        # Dibujar puntos de labios
+        # Labios
         for pt in lips:
             cv2.circle(frame, pt, 2, WHITE, -1)
 
-        # Texto de métricas
+        # EAR
         cv2.putText(
             frame,
             f"EAR: {ear:.3f}",
@@ -70,6 +59,8 @@ class Drawer:
             color,
             2,
         )
+
+        # MOR
         cv2.putText(
             frame,
             f"MOR: {mor:.3f}",
@@ -80,11 +71,24 @@ class Drawer:
             2,
         )
 
+        # Ojos cerrados
         if not eye_open:
             cv2.putText(
                 frame,
                 "OJOS CERRADOS!",
                 (10, 100),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.9,
+                RED,
+                2,
+            )
+
+        # Celular detectado
+        if phone_detected:
+            cv2.putText(
+                frame,
+                "CELULAR DETECTADO",
+                (10, 140),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.9,
                 RED,

@@ -1,4 +1,5 @@
 """Dashboard principal de DrowsyGuard.
+
 Interfaz en tiempo real para monitoreo de somnolencia del conductor.
 Consume la API FastAPI en :8000 y refresca automáticamente.
 """
@@ -335,6 +336,7 @@ def render_history_chart(
     time_history: deque[float],
 ) -> None:
     """Renderiza el gráfico de histórico EAR y PERCLOS con Plotly.
+
     Args:
         ear_history: Cola circular con valores de EAR.
         perclos_history: Cola circular con valores de PERCLOS.
@@ -407,6 +409,7 @@ def render_history_chart(
 
 
 # ── Página principal ──────────────────────────────────────────────────────────
+
 def main() -> None:
     """Punto de entrada del dashboard DrowsyGuard."""
     render_page_config()
@@ -441,6 +444,7 @@ def main() -> None:
             )
         else:
             st.info("▶ Pulsa **Iniciar** en el panel lateral para activar la cámara.")
+
     with col_right:
         st.subheader("📊 Métricas actuales")
         if data:
@@ -448,12 +452,14 @@ def main() -> None:
             render_perclos_gauge(data.get("perclos", 0.0), alert_level)
         else:
             st.warning("Sin datos — verifica que la API esté corriendo en :8000")
+
     st.divider()
     render_history_chart(
         st.session_state.ear_history,
         st.session_state.perclos_history,
         st.session_state.time_history,
     )
+
     if auto_refresh:
         time.sleep(REFRESH_INTERVAL)
         st.rerun()

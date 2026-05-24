@@ -19,6 +19,7 @@ def voice_system():
 def test_inherits_alert_system(voice_system):
     """VoiceAlertSystem hereda de AlertSystem."""
     from src.alarm.alert_system import AlertSystem
+
     assert isinstance(voice_system, AlertSystem)
 
 

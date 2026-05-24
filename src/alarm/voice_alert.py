@@ -27,8 +27,7 @@ class VoiceAlertSystem(AlertSystem):
             "Considera detenerte y descansar."
         ),
         AlertLevel.CRITICAL: (
-            "Alerta crítica. Detente en un lugar seguro "
-            "y descansa inmediatamente."
+            "Alerta crítica. Detente en un lugar seguro " "y descansa inmediatamente."
         ),
     }
 

@@ -345,10 +345,8 @@ def render_history_chart(
     if not time_history:
         st.info("El gráfico aparecerá cuando el stream esté activo.")
         return
-
     t = list(time_history)
     t_rel = [round(ti - t[0], 1) for ti in t]
-
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
@@ -411,7 +409,6 @@ def render_history_chart(
 
 
 # ── Página principal ──────────────────────────────────────────────────────────
-
 
 def main() -> None:
     """Punto de entrada del dashboard DrowsyGuard."""

@@ -16,23 +16,9 @@ class AlertLevelSchema(IntEnum):
 
 
 class DrowsinessMetrics(BaseModel):
-    ear: float = Field(
-        ge=0.0,
-        le=1.0,
-        description="Eye Aspect Ratio",
-    )
-
-    mor: float = Field(
-        ge=0.0,
-        description="Mouth Open Ratio",
-    )
-
-    perclos: float = Field(
-        ge=0.0,
-        le=1.0,
-        description="% frames ojos cerrados",
-    )
-
+    ear: float = Field(ge=0.0, le=1.0, description="Eye Aspect Ratio")
+    mor: float = Field(ge=0.0, description="Mouth Open Ratio")
+    perclos: float = Field(ge=0.0, le=1.0, description="% frames ojos cerrados")
     alert_level: AlertLevelSchema
 
     phone_detected: bool = False

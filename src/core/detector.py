@@ -21,6 +21,7 @@ from src.utils.calculations import Calculator
 from src.utils.drawing import Drawer
 from src.utils.logger import get_logger
 from src.utils.mediapipe_wrapper import FaceMeshWrapper, PointsExtractor
+from src.core.phone_detector import PhoneDetector
 from src.utils.preprocess import Enhancer, Preprocessor
 
 logger = get_logger(__name__)
@@ -41,7 +42,7 @@ class FrameResult:
     yawning: bool = False
     phone_detected: bool = False
     face_detected: bool = False
-    annotated_frame: Optional[np.ndarray] = None
+    annotated_frame: np.ndarray | None = None
     timestamp: float = field(default_factory=time.time)
 
 
@@ -94,6 +95,7 @@ class DrowsinessDetector:
         self._drawer = Drawer()
         self._face_mesh = FaceMeshWrapper()
         self._points = PointsExtractor()
+        self._phone_detector = PhoneDetector()
 
         logger.info(
             f"DrowsinessDetector listo | "
@@ -147,6 +149,10 @@ class DrowsinessDetector:
             result.eye_open = result.ear > self._ear_threshold
             result.yawning = result.mor > self._mor_threshold
 
+            # Detección de uso de celular
+            phone_res = self._phone_detector.detect(enhanced, face_landmarks[0], w, h)
+            result.phone_detected = phone_res.phone_detected
+
             result.annotated_frame = self._drawer.annotate(
                 frame,
                 left_eye,
@@ -155,6 +161,7 @@ class DrowsinessDetector:
                 result.ear,
                 result.mor,
                 result.eye_open,
+                phone_detected=result.phone_detected,
             )
 
         except Exception:

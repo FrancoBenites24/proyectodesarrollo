@@ -410,6 +410,7 @@ def render_history_chart(
 
 # ── Página principal ──────────────────────────────────────────────────────────
 
+
 def main() -> None:
     """Punto de entrada del dashboard DrowsyGuard."""
     render_page_config()

@@ -22,6 +22,9 @@ class DrowsinessMetrics(BaseModel):
     alert_level: AlertLevelSchema
 
     phone_detected: bool = False
+    is_distracted: bool = False
+    head_yaw: float = 0.0
+    head_pitch: float = 0.0
 
     face_detected: bool
 

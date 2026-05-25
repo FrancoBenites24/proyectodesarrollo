@@ -24,6 +24,8 @@ class HeadPose:
     pitch: float = 0.0
     roll: float = 0.0
     is_distracted: bool = False
+    rvec: np.ndarray | None = None
+    tvec: np.ndarray | None = None
 
 
 class HeadPoseEstimator:
@@ -138,4 +140,6 @@ class HeadPoseEstimator:
             pitch=round(pitch, 1),
             roll=round(roll, 1),
             is_distracted=is_distracted,
+            rvec=rvec,
+            tvec=tvec,
         )

@@ -10,9 +10,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from src.api.database import engine, Base
-from src.api.routes import health, metrics, stream
-from src.api.routes import drivers, alerts
+from src.api.database import Base, engine
+from src.api.routes import alerts, drivers, health, metrics, stream
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)

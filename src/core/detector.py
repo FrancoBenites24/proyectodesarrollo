@@ -31,6 +31,12 @@ DEFAULT_KEYPOINTS: dict[str, tuple[int, ...]] = {
     "right_eye": (33, 160, 158, 133, 153, 144),
     "lips": (61, 17, 291, 0),
     "nose_to_chin": (1, 152),
+    # Nuevos landmarks v3.0
+    "left_eyebrow": (46, 53, 52, 65, 55),
+    "right_eyebrow": (276, 283, 282, 295, 285),
+    "left_iris": (468, 469, 470, 471),
+    "right_iris": (473, 474, 475, 476),
+    "head_pose": (1, 152, 263, 33, 61, 291),
 }
 
 
@@ -41,6 +47,9 @@ class FrameResult:
     eye_open: bool = True
     yawning: bool = False
     phone_detected: bool = False
+    is_distracted: bool = False  # NUEVO
+    head_yaw: float = 0.0  # NUEVO
+    head_pitch: float = 0.0  # NUEVO
     face_detected: bool = False
     annotated_frame: np.ndarray | None = None
     timestamp: float = field(default_factory=time.time)

@@ -1,11 +1,11 @@
 """Tests para VoiceAlertSystem."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from src.alarm.voice_alert import VoiceAlertSystem
-from src.core.temporal import AlertLevel, TemporalState
+from src.core.temporal import AlertLevel
 
 
 @pytest.fixture

@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import threading
 from typing import Optional
 
 from src.alarm.alert_system import AlertSystem
 from src.alarm.voice_engine import VoiceEngine
-from src.core.temporal import AlertLevel, TemporalState
+from src.core.temporal import AlertLevel
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)

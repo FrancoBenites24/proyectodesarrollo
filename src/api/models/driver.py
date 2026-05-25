@@ -1,4 +1,5 @@
 """Modelo Driver para la base de datos."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -14,7 +15,9 @@ class Driver(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    license_plate: Mapped[str | None] = mapped_column(String(20), nullable=True, unique=True)
+    license_plate: Mapped[str | None] = mapped_column(
+        String(20), nullable=True, unique=True
+    )
     status: Mapped[str] = mapped_column(String(20), default="inactive")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
     updated_at: Mapped[datetime | None] = mapped_column(DateTime, onupdate=func.now())

@@ -1,4 +1,5 @@
 """Endpoints para historial de alertas."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
@@ -13,9 +14,7 @@ router = APIRouter()
 
 @router.get("/")
 async def list_alerts(
-    driver_id: int | None = None,
-    limit: int = 50,
-    db: AsyncSession = Depends(get_db)
+    driver_id: int | None = None, limit: int = 50, db: AsyncSession = Depends(get_db)
 ):
     """Listar alertas con filtro opcional por conductor."""
     query = select(AlertEvent).limit(limit)
@@ -32,7 +31,7 @@ async def alert_stats(db: AsyncSession = Depends(get_db)):
         select(
             AlertEvent.alert_level,
             AlertEvent.event_type,
-            func.count(AlertEvent.id).label("total")
+            func.count(AlertEvent.id).label("total"),
         ).group_by(AlertEvent.alert_level, AlertEvent.event_type)
     )
     rows = result.all()

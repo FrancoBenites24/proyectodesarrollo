@@ -1,4 +1,5 @@
 """Modelo DrivingSession para la base de datos."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -13,7 +14,9 @@ class DrivingSession(Base):
     __tablename__ = "driving_sessions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    driver_id: Mapped[int] = mapped_column(Integer, ForeignKey("drivers.id"), nullable=False)
+    driver_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("drivers.id"), nullable=False
+    )
     start_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     end_time: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     total_alerts: Mapped[int] = mapped_column(Integer, default=0)

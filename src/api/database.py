@@ -1,4 +1,5 @@
 """Configuración de la base de datos con SQLAlchemy async."""
+
 from __future__ import annotations
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
@@ -10,7 +11,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://drowsyguard:drowsyguard123@localhost:5432/drowsyguard"
+    "postgresql+asyncpg://drowsyguard:drowsyguard123@localhost:5432/drowsyguard",
 )
 
 engine = create_async_engine(DATABASE_URL, echo=True)

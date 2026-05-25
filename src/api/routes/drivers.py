@@ -1,4 +1,5 @@
 """Endpoints CRUD para conductores."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException

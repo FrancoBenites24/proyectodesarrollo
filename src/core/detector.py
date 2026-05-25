@@ -17,11 +17,11 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from src.core.phone_detector import PhoneDetector
 from src.utils.calculations import Calculator
 from src.utils.drawing import Drawer
 from src.utils.logger import get_logger
 from src.utils.mediapipe_wrapper import FaceMeshWrapper, PointsExtractor
-from src.core.phone_detector import PhoneDetector
 from src.utils.preprocess import Enhancer, Preprocessor
 
 logger = get_logger(__name__)

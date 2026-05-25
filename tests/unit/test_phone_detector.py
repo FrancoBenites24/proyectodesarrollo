@@ -20,6 +20,7 @@ def test_frame_result_has_phone_detected():
 
 def test_phone_detector_detect_no_face():
     from src.core.phone_detector import PhoneDetector
+
     detector = PhoneDetector()
     res = detector.detect(None, None, 480, 480)
     assert res.phone_detected is False
@@ -28,12 +29,13 @@ def test_phone_detector_detect_no_face():
 
 def test_phone_detector_detect_no_hands():
     from unittest.mock import MagicMock
+
     from src.core.phone_detector import PhoneDetector
-    
+
     detector = PhoneDetector()
     # Mockear HandsWrapper para retornar lista vacía o None
     detector._hands.process = MagicMock(return_value=None)
-    
+
     mock_face = MagicMock()
     res = detector.detect(None, mock_face, 480, 480)
     assert res.phone_detected is False

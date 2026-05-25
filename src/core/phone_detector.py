@@ -131,9 +131,7 @@ class PhoneDetector:
 
         min_distance = min(dist_left, dist_right)
 
-        max_distance = (
-            frame_width * self.HAND_FACE_DISTANCE_RATIO
-        )
+        max_distance = frame_width * self.HAND_FACE_DISTANCE_RATIO
 
         hand_y = hand_center[1]
         nose_y = nose[1]
@@ -141,14 +139,9 @@ class PhoneDetector:
         face_top = int(nose_y - (frame_height * 0.15))
         face_bottom = int(nose_y + (frame_height * 0.20))
 
-        hand_in_face_zone = (
-            face_top <= hand_y <= face_bottom
-        )
+        hand_in_face_zone = face_top <= hand_y <= face_bottom
 
-        phone_detected = (
-            min_distance < max_distance
-            and hand_in_face_zone
-        )
+        phone_detected = min_distance < max_distance and hand_in_face_zone
 
         return PhoneResult(
             phone_detected=phone_detected,

@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from src.core.head_pose import HeadPoseEstimator
 from src.core.phone_detector import PhoneDetector
 from src.utils.calculations import Calculator
 from src.utils.drawing import Drawer
@@ -105,6 +106,7 @@ class DrowsinessDetector:
         self._face_mesh = FaceMeshWrapper()
         self._points = PointsExtractor()
         self._phone_detector = PhoneDetector()
+        self._head_pose = HeadPoseEstimator()
 
         logger.info(
             f"DrowsinessDetector listo | "
@@ -162,6 +164,18 @@ class DrowsinessDetector:
             phone_res = self._phone_detector.detect(enhanced, face_landmarks[0], w, h)
             result.phone_detected = phone_res.phone_detected
 
+            # Estimación de orientación
+            pose_res = self._head_pose.estimate(face_landmarks[0], w, h)
+            result.is_distracted = pose_res.is_distracted
+            result.head_yaw = pose_res.yaw
+            result.head_pitch = pose_res.pitch
+
+            # Extraer nuevos landmarks
+            left_eyebrow = self._points.get(face_landmarks, kp["left_eyebrow"], w, h)
+            right_eyebrow = self._points.get(face_landmarks, kp["right_eyebrow"], w, h)
+            left_iris = self._points.get(face_landmarks, kp["left_iris"], w, h)
+            right_iris = self._points.get(face_landmarks, kp["right_iris"], w, h)
+
             result.annotated_frame = self._drawer.annotate(
                 frame,
                 left_eye,
@@ -171,6 +185,11 @@ class DrowsinessDetector:
                 result.mor,
                 result.eye_open,
                 phone_detected=result.phone_detected,
+                left_eyebrow=left_eyebrow,
+                right_eyebrow=right_eyebrow,
+                left_iris=left_iris,
+                right_iris=right_iris,
+                head_pose=pose_res,
             )
 
         except Exception:

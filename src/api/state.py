@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import time
-from typing import Optional
 
-from src.api.schemas import AlertLevelSchema, DrownsinessMetrics
-from src.alarm.alert_system import AlertSystem
+import cv2
+
+from src.api.schemas import AlertLevelSchema, DrowsinessMetrics
 from src.core.detector import DrowsinessDetector
 from src.core.temporal import TemporalAnalyzer
 from src.core.video_stream import VideoStream
@@ -16,23 +17,40 @@ from src.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
+def get_alert_system():
+    """Retorna el sistema de alerta configurado (voz o básico)."""
+    use_voice = os.getenv("ALERT_MODE", "voice") == "voice"
+    if use_voice:
+        from src.alarm.voice_alert import VoiceAlertSystem
+
+        return VoiceAlertSystem()
+    else:
+        from src.alarm.alert_system import AlertSystem
+
+        return AlertSystem()
+
+
 class AppState:
     def __init__(self) -> None:
         self.start_time = time.time()
         self.is_running = False
         self.camera_connected = False
-        self.last_metrics = DrownsinessMetrics(
+        self.last_metrics = DrowsinessMetrics(
             ear=0.0,
             mor=0.0,
             perclos=0.0,
             alert_level=AlertLevelSchema.NONE,
+            phone_detected=False,
+            is_distracted=False,
+            head_yaw=0.0,
+            head_pitch=0.0,
             face_detected=False,
             fps=0.0,
             timestamp=time.time(),
         )
-        self.last_frame: Optional[bytes] = None
-        self._task: Optional[asyncio.Task] = None
-        self._stream: Optional[VideoStream] = None
+        self.last_frame: bytes | None = None
+        self._task: asyncio.Task | None = None
+        self._stream: VideoStream | None = None
 
     async def start(self, source: int | str = 0) -> None:
         try:
@@ -61,7 +79,7 @@ class AppState:
     async def _detection_loop(self) -> None:
         detector = DrowsinessDetector()
         analyzer = TemporalAnalyzer()
-        alert_system = AlertSystem()
+        alert_system = get_alert_system()
 
         frame_count = 0
         t0 = time.time()
@@ -80,16 +98,21 @@ class AppState:
             fps = frame_count / max(time.time() - t0, 1e-6)
 
             # Guardar el frame anotado para el stream de video
-            import cv2
-            out_frame = result.annotated_frame if result.annotated_frame is not None else frame
+            out_frame = (
+                result.annotated_frame if result.annotated_frame is not None else frame
+            )
             _, buffer = cv2.imencode(".jpg", out_frame)
             self.last_frame = buffer.tobytes()
 
-            self.last_metrics = DrownsinessMetrics(
+            self.last_metrics = DrowsinessMetrics(
                 ear=result.ear,
                 mor=result.mor,
                 perclos=state.perclos,
                 alert_level=AlertLevelSchema(int(state.alert_level)),
+                phone_detected=result.phone_detected,
+                is_distracted=result.is_distracted,
+                head_yaw=result.head_yaw,
+                head_pitch=result.head_pitch,
                 face_detected=result.face_detected,
                 fps=round(fps, 1),
                 timestamp=result.timestamp,

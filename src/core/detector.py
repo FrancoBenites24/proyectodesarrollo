@@ -3,7 +3,7 @@
 Integra todos los utils del Issue #2 para producir un FrameResult
 con EAR, MOR y si el conductor tiene los ojos abiertos o está bostezando.
 
-Landmarks de referencia validados del repo original:
+Landmarks de referencia validados:
     left_eye:    (362, 385, 387, 263, 373, 380)
     right_eye:   (33, 160, 158, 133, 153, 144)
     lips:        (61, 17, 291, 0)
@@ -14,10 +14,11 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 import numpy as np
 
+from src.core.head_pose import HeadPoseEstimator
+from src.core.phone_detector import PhoneDetector
 from src.utils.calculations import Calculator
 from src.utils.drawing import Drawer
 from src.utils.logger import get_logger
@@ -31,29 +32,27 @@ DEFAULT_KEYPOINTS: dict[str, tuple[int, ...]] = {
     "right_eye": (33, 160, 158, 133, 153, 144),
     "lips": (61, 17, 291, 0),
     "nose_to_chin": (1, 152),
+    # Nuevos landmarks v3.0
+    "left_eyebrow": (46, 53, 52, 65, 55),
+    "right_eyebrow": (276, 283, 282, 295, 285),
+    "left_iris": (468, 469, 470, 471),
+    "right_iris": (473, 474, 475, 476),
+    "head_pose": (1, 152, 263, 33, 61, 291),
 }
 
 
 @dataclass
 class FrameResult:
-    """Resultado del procesamiento de un frame.
-
-    Attributes:
-        ear: Eye Aspect Ratio (0.0 = cerrado, ~0.3 = abierto).
-        mor: Mouth Open Ratio (> 0.6 indica bostezo).
-        eye_open: True si el EAR supera el umbral configurado.
-        yawning: True si el MOR supera el umbral configurado.
-        face_detected: True si Mediapipe detectó una cara en el frame.
-        annotated_frame: Frame con landmarks y métricas dibujados.
-        timestamp: Tiempo Unix del momento en que se procesó el frame.
-    """
-
     ear: float = 0.0
     mor: float = 0.0
     eye_open: bool = True
     yawning: bool = False
+    phone_detected: bool = False
+    is_distracted: bool = False  # NUEVO
+    head_yaw: float = 0.0  # NUEVO
+    head_pitch: float = 0.0  # NUEVO
     face_detected: bool = False
-    annotated_frame: Optional[np.ndarray] = None
+    annotated_frame: np.ndarray | None = None
     timestamp: float = field(default_factory=time.time)
 
 
@@ -81,7 +80,7 @@ class DrowsinessDetector:
 
     def __init__(
         self,
-        keypoints: Optional[dict[str, tuple[int, ...]]] = None,
+        keypoints: dict[str, tuple[int, ...]] | None = None,
         frame_size: tuple[int, int] = (480, 480),
         ear_threshold: float = 0.25,
         mor_threshold: float = 0.6,
@@ -106,6 +105,8 @@ class DrowsinessDetector:
         self._drawer = Drawer()
         self._face_mesh = FaceMeshWrapper()
         self._points = PointsExtractor()
+        self._phone_detector = PhoneDetector()
+        self._head_pose = HeadPoseEstimator()
 
         logger.info(
             f"DrowsinessDetector listo | "
@@ -154,11 +155,26 @@ class DrowsinessDetector:
                 result.annotated_frame = frame
                 return result
 
-            # ✅ NUNCA usar random — siempre el valor calculado real
             result.ear = round(min(ear_l, ear_r), 3)
             result.mor = round(self._calculator.mor(lips), 3)
             result.eye_open = result.ear > self._ear_threshold
             result.yawning = result.mor > self._mor_threshold
+
+            # Detección de uso de celular
+            phone_res = self._phone_detector.detect(enhanced, face_landmarks[0], w, h)
+            result.phone_detected = phone_res.phone_detected
+
+            # Estimación de orientación
+            pose_res = self._head_pose.estimate(face_landmarks[0], w, h)
+            result.is_distracted = pose_res.is_distracted
+            result.head_yaw = pose_res.yaw
+            result.head_pitch = pose_res.pitch
+
+            # Extraer nuevos landmarks
+            left_eyebrow = self._points.get(face_landmarks, kp["left_eyebrow"], w, h)
+            right_eyebrow = self._points.get(face_landmarks, kp["right_eyebrow"], w, h)
+            left_iris = self._points.get(face_landmarks, kp["left_iris"], w, h)
+            right_iris = self._points.get(face_landmarks, kp["right_iris"], w, h)
 
             result.annotated_frame = self._drawer.annotate(
                 frame,
@@ -168,6 +184,12 @@ class DrowsinessDetector:
                 result.ear,
                 result.mor,
                 result.eye_open,
+                phone_detected=result.phone_detected,
+                left_eyebrow=left_eyebrow,
+                right_eyebrow=right_eyebrow,
+                left_iris=left_iris,
+                right_iris=right_iris,
+                head_pose=pose_res,
             )
 
         except Exception:

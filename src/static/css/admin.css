@@ -1,0 +1,373 @@
+/* admin.css — DrowsyGuard Panel de Supervisión
+ * Extiende dashboard.css — requiere sus variables CSS
+ */
+
+/* ── Admin badge ─────────────────────────────────────── */
+.admin-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--bg-accent);
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.btn-sm {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.78rem;
+}
+
+/* ── KPI Bar ──────────────────────────────────────────── */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  padding: 1rem 1.5rem 0;
+}
+
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  transition: border-color var(--transition);
+}
+
+.kpi-card:hover {
+  border-color: var(--accent);
+}
+
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.kpi-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Admin main layout ───────────────────────────────── */
+.admin-main {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  flex: 1;
+}
+
+.admin-left,
+.admin-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0 0.75rem;
+}
+
+/* ── Driver Grid ──────────────────────────────────────── */
+.driver-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+
+.driver-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  padding: 2rem;
+}
+
+/* ── Driver Card ──────────────────────────────────────── */
+.driver-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: all var(--transition);
+  cursor: default;
+}
+
+.driver-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px var(--shadow);
+}
+
+.driver-card.active {
+  border-left-color: var(--success);
+}
+
+.driver-card.alert {
+  border-left-color: var(--danger);
+  animation: pulse-border 1.5s ease-in-out infinite;
+}
+
+.driver-card.inactive {
+  border-left-color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-left-color: var(--danger); }
+  50%       { border-left-color: rgba(239,83,80,0.3); }
+}
+
+.driver-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.driver-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.driver-plate {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  background: var(--bg-accent);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.driver-status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  letter-spacing: 0.04em;
+}
+
+.status-active   { background: rgba(0,212,170,0.15); color: var(--success); }
+.status-alert    { background: rgba(239,83,80,0.15);  color: var(--danger); }
+.status-inactive { background: rgba(160,160,160,0.1); color: var(--text-secondary); }
+
+.driver-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.driver-metric {
+  display: flex;
+  flex-direction: column;
+}
+
+.driver-metric-val {
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.driver-metric-lbl {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.driver-activity {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Alert Timeline ───────────────────────────────────── */
+.alert-timeline {
+  max-height: 360px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-top: 0.5rem;
+}
+
+/* ── Driver Table ─────────────────────────────────────── */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.driver-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.driver-table thead th {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.driver-table thead th:hover {
+  color: var(--text);
+}
+
+.driver-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+
+.driver-table tbody tr:nth-child(even) {
+  background: var(--bg-accent);
+}
+
+.driver-table tbody tr:hover {
+  background: rgba(0, 212, 170, 0.05);
+}
+
+.driver-table td {
+  padding: 0.6rem 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 1.5rem !important;
+}
+
+/* ── Modal ────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: modal-in 0.2s ease;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.95) translateY(-8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.2rem;
+  line-height: 1;
+}
+.btn-close:hover { color: var(--danger); }
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.form-input {
+  background: var(--bg-accent);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  color: var(--text);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.form-input:focus {
+  border-color: var(--accent);
+}
+
+.form-error {
+  font-size: 0.78rem;
+  color: var(--danger);
+  background: rgba(239, 83, 80, 0.1);
+  border: 1px solid var(--danger);
+  border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+}
+
+/* ── Responsive ───────────────────────────────────────── */
+@media (max-width: 900px) {
+  .admin-main {
+    grid-template-columns: 1fr;
+    padding: 0.75rem;
+  }
+  .stats-bar {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-bar { grid-template-columns: 1fr 1fr; }
+  .driver-grid { grid-template-columns: 1fr; }
+}

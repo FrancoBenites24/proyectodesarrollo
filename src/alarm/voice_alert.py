@@ -29,21 +29,15 @@ class VoiceAlertSystem(AlertSystem):
             "Considera detenerte y descansar."
         ),
         AlertLevel.CRITICAL: (
-            "Alerta crítica. Detente en un lugar seguro "
-            "y descansa inmediatamente."
+            "Alerta crítica. Detente en un lugar seguro " "y descansa inmediatamente."
         ),
     }
 
-    _PHONE_MESSAGE = (
-        "Por favor, deja el celular y concéntrate en la carretera."
-    )
+    _PHONE_MESSAGE = "Por favor, deja el celular y concéntrate en la carretera."
 
     _DISTRACTION_MESSAGE = "Atención, mantén la vista en el camino."
 
-    _YAWN_MESSAGE = (
-        "Has bostezado varias veces. "
-        "Considera detenerte a descansar."
-    )
+    _YAWN_MESSAGE = "Has bostezado varias veces. " "Considera detenerte a descansar."
 
     def __init__(self, webhook_url: Optional[str] = None) -> None:
         super().__init__(webhook_url=webhook_url)

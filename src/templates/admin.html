@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DrowsyGuard — Panel de Supervisión</title>
+  <link rel="stylesheet" href="/static/css/dashboard.css" />
+  <link rel="stylesheet" href="/static/css/admin.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ── HEADER ─────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="15" stroke="var(--accent)" stroke-width="1.5"/>
+          <ellipse cx="16" cy="16" rx="6" ry="9" stroke="var(--accent)" stroke-width="1.5"/>
+          <circle cx="16" cy="16" r="2.5" fill="var(--accent)"/>
+          <line x1="16" y1="4" x2="16" y2="7" stroke="var(--accent)" stroke-width="1.5"/>
+          <line x1="16" y1="25" x2="16" y2="28" stroke="var(--accent)" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="header-title">
+        <span class="title-main">DrowsyGuard</span>
+        <span class="title-sub">Panel de Supervisión</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="admin-badge">
+        <span>👤</span>
+        <span>Admin</span>
+      </div>
+      <div class="connection-badge" id="connectionBadge">
+        <span class="connection-dot" id="connectionDot"></span>
+        <span id="connectionText">Conectando...</span>
+      </div>
+      <a href="/" class="btn btn-secondary btn-sm">← Monitor</a>
+      <button class="theme-toggle" id="themeToggle" title="Cambiar tema">☀️</button>
+    </div>
+  </header>
+
+  <!-- ── KPI BAR ────────────────────────────────────────── -->
+  <section class="stats-bar">
+    <div class="kpi-card">
+      <div class="kpi-value" id="kpiActive">—</div>
+      <div class="kpi-label">Conductores activos</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value" id="kpiTotal">—</div>
+      <div class="kpi-label">Total conductores</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value" id="kpiAlerts">—</div>
+      <div class="kpi-label">Alertas registradas</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value" id="kpiCritical">—</div>
+      <div class="kpi-label">Alertas críticas</div>
+    </div>
+  </section>
+
+  <!-- ── CONTENIDO PRINCIPAL ────────────────────────────── -->
+  <main class="admin-main">
+
+    <!-- Columna izquierda: conductores + gráfico -->
+    <div class="admin-left">
+
+      <!-- Cards de conductores -->
+      <div class="section-header">
+        <span class="card-icon">🚗</span>
+        <span class="card-title">Conductores Registrados</span>
+        <span class="last-update" id="driversUpdate">—</span>
+        <button class="btn btn-primary btn-sm" id="btnRegister">+ Registrar</button>
+      </div>
+
+      <div class="driver-grid" id="driverGrid">
+        <div class="driver-empty">Cargando conductores...</div>
+      </div>
+
+      <!-- Gráfico de barras -->
+      <div class="card" style="margin-top:1rem;">
+        <div class="card-header">
+          <span class="card-icon">📊</span>
+          <span class="card-title">Alertas por conductor</span>
+        </div>
+        <div style="height:220px; position:relative;">
+          <canvas id="alertsChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Columna derecha: timeline + tabla -->
+    <div class="admin-right">
+
+      <!-- Timeline global -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">🕐</span>
+          <span class="card-title">Timeline de alertas</span>
+          <span class="timeline-count" id="alertCount">0 alertas</span>
+        </div>
+        <div class="alert-timeline" id="alertTimeline">
+          <div class="timeline-empty">Sin alertas registradas</div>
+        </div>
+      </div>
+
+      <!-- Tabla de conductores -->
+      <div class="card" style="margin-top:1rem;">
+        <div class="card-header">
+          <span class="card-icon">📋</span>
+          <span class="card-title">Tabla de conductores</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="driver-table" id="driverTable">
+            <thead>
+              <tr>
+                <th data-col="name">Nombre ↕</th>
+                <th data-col="plate">Placa</th>
+                <th data-col="status">Estado</th>
+                <th data-col="alerts">Alertas</th>
+                <th data-col="perclos">PERCLOS máx</th>
+                <th data-col="updated">Última actividad</th>
+              </tr>
+            </thead>
+            <tbody id="driverTableBody">
+              <tr><td colspan="6" class="table-empty">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── MODAL: Registrar conductor ────────────────────── -->
+  <div class="modal-overlay" id="modalOverlay" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="card-title">Registrar Conductor</span>
+        <button class="btn-close" id="btnCloseModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Nombre *</label>
+          <input class="form-input" type="text" id="inputName" placeholder="Ej: Juan Pérez" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Placa (opcional)</label>
+          <input class="form-input" type="text" id="inputPlate" placeholder="Ej: ABC-123" />
+        </div>
+        <div class="form-error" id="formError" style="display:none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelModal">Cancelar</button>
+        <button class="btn btn-primary" id="btnSubmitDriver">Registrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/admin.js"></script>
+</body>
+</html>

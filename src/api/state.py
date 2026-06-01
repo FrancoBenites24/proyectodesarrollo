@@ -8,6 +8,7 @@ import time
 
 import cv2
 
+from src.alarm.driving_timer import DrivingTimer
 from src.api.schemas import AlertLevelSchema, DrowsinessMetrics
 from src.core.detector import DrowsinessDetector
 from src.core.temporal import TemporalAnalyzer
@@ -35,6 +36,7 @@ class AppState:
         self.start_time = time.time()
         self.is_running = False
         self.camera_connected = False
+        self.driving_timer = DrivingTimer()
         self.last_metrics = DrowsinessMetrics(
             ear=0.0,
             mor=0.0,
@@ -55,6 +57,7 @@ class AppState:
     async def start(self, source: int | str = 0) -> None:
         try:
             self._stream = VideoStream(source=source).start()
+            self.driving_timer.start()
             self.camera_connected = True
             self.is_running = True
             self._task = asyncio.create_task(self._detection_loop())
@@ -73,6 +76,7 @@ class AppState:
                 pass
         if self._stream:
             self._stream.stop()
+        self.driving_timer.stop()
         self.camera_connected = False
         logger.info("Detección detenida")
 
@@ -92,7 +96,11 @@ class AppState:
 
             result = detector.process(frame)
             state = analyzer.update(result.eye_open)
-            alert_system.process(state)
+            
+            if hasattr(alert_system, "process_extended"):
+                alert_system.process_extended(state, result, self.driving_timer)
+            else:
+                alert_system.process(state)
 
             frame_count += 1
             fps = frame_count / max(time.time() - t0, 1e-6)
@@ -121,3 +129,4 @@ class AppState:
 
 
 app_state = AppState()
+

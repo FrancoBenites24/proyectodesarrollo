@@ -41,7 +41,7 @@ class AppState:
         self.start_time = time.time()
         self.is_running = False
         self.camera_connected = False
-
+        self.driving_timer = DrivingTimer()
         self.last_metrics = DrowsinessMetrics(
             ear=0.0,
             mor=0.0,
@@ -65,6 +65,7 @@ class AppState:
     async def start(self, source: int | str = 0) -> None:
         try:
             self._stream = VideoStream(source=source).start()
+            self.driving_timer.start()
             self.camera_connected = True
             self.is_running = True
 
@@ -89,7 +90,7 @@ class AppState:
 
         if self._stream:
             self._stream.stop()
-
+        self.driving_timer.stop()
         self.camera_connected = False
 
         logger.info("Detección detenida")
@@ -130,9 +131,6 @@ class AppState:
         analyzer = TemporalAnalyzer()
 
         alert_system = get_alert_system()
-
-        timer = DrivingTimer()
-        timer.start()
 
         frame_count = 0
         t0 = time.time()
@@ -182,7 +180,7 @@ class AppState:
                 alert_system.process_extended(
                     state,
                     result,
-                    timer,
+                    self.driving_timer,
                 )
             else:
                 alert_system.process(state)
@@ -239,7 +237,7 @@ class AppState:
                 head_pitch=result.head_pitch,
                 yawning=result.yawning,
                 driving_minutes=round(
-                    timer.elapsed_minutes,
+                    self.driving_timer.elapsed_minutes,
                     1,
                 ),
                 face_detected=result.face_detected,
@@ -251,3 +249,4 @@ class AppState:
 
 
 app_state = AppState()
+

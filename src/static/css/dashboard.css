@@ -1,4 +1,3 @@
-/* ── Variables de tema ───────────────────────────────────────── */
 :root {
   --bg:           #0f0f23;
   --bg-card:      #1a1a2e;
@@ -27,7 +26,6 @@
   --shadow:       rgba(0, 0, 0, 0.08);
 }
 
-/* ── Reset y base ────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -40,7 +38,6 @@ body {
   transition: background var(--transition), color var(--transition);
 }
 
-/* ── Header ──────────────────────────────────────────────────── */
 .header {
   display: flex;
   align-items: center;
@@ -113,7 +110,6 @@ body {
 }
 .theme-toggle:hover { background: var(--border); }
 
-/* ── Grid principal ──────────────────────────────────────────── */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -123,7 +119,6 @@ body {
   flex: 1;
 }
 
-/* ── Cards ───────────────────────────────────────────────────── */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -148,7 +143,6 @@ body {
 .card-title { font-size: 0.85rem; font-weight: 600; letter-spacing: 0.03em; flex: 1; }
 .last-update { font-size: 0.7rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 
-/* ── Card Video ──────────────────────────────────────────────── */
 .camera-status {
   display: flex;
   align-items: center;
@@ -210,7 +204,6 @@ body {
   border: 1px solid var(--border);
 }
 
-/* ── Botones ─────────────────────────────────────────────────── */
 .btn {
   padding: 0.45rem 1rem;
   border-radius: 8px;
@@ -235,7 +228,6 @@ body {
 }
 .btn-secondary:hover { background: var(--border); }
 
-/* ── Card Semáforo ───────────────────────────────────────────── */
 .semaphore-container {
   display: flex;
   align-items: center;
@@ -264,7 +256,6 @@ body {
   cursor: default;
 }
 
-/* colores activos */
 .semaphore-light.active[data-level="0"] {
   background: var(--success);
   box-shadow: 0 0 18px var(--success), 0 0 36px rgba(0,212,170,0.3);
@@ -325,7 +316,6 @@ body {
   text-align: center;
 }
 
-/* ── Card Métricas con anillos SVG ───────────────────────────── */
 .metrics-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -400,14 +390,12 @@ body {
   text-align: center;
 }
 
-/* ── Card Chart ──────────────────────────────────────────────── */
 .chart-container {
   flex: 1;
   min-height: 180px;
   position: relative;
 }
 
-/* ── Timeline ────────────────────────────────────────────────── */
 .timeline-section {
   margin: 0 1.5rem 1rem;
   background: var(--bg-card);
@@ -476,6 +464,7 @@ body {
 .timeline-item.level-1 { border-left-color: var(--warning); }
 .timeline-item.level-2 { border-left-color: var(--danger); }
 .timeline-item.level-3 { border-left-color: var(--critical); }
+.timeline-item.level-eyes { border-left-color: #7e57c2; }
 
 .timeline-time  { color: var(--text-secondary); font-variant-numeric: tabular-nums; min-width: 60px; }
 .timeline-icon  { font-size: 1rem; }
@@ -487,11 +476,11 @@ body {
   font-weight: 600;
   letter-spacing: 0.04em;
 }
-.badge-1 { background: rgba(255,167,38,0.15); color: var(--warning); }
-.badge-2 { background: rgba(239,83,80,0.15);  color: var(--danger); }
-.badge-3 { background: rgba(255,23,68,0.15);  color: var(--critical); }
+.badge-1    { background: rgba(255,167,38,0.15); color: var(--warning); }
+.badge-2    { background: rgba(239,83,80,0.15);  color: var(--danger); }
+.badge-3    { background: rgba(255,23,68,0.15);  color: var(--critical); }
+.badge-eyes { background: rgba(126,87,194,0.15); color: #7e57c2; }
 
-/* ── Footer ──────────────────────────────────────────────────── */
 .footer {
   display: flex;
   align-items: center;
@@ -509,7 +498,6 @@ body {
   font-size: 0.7rem;
 }
 
-/* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .dashboard-grid {
     grid-template-columns: 1fr;

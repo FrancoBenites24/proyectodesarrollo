@@ -1,22 +1,16 @@
-/* dashboard.js — DrowsyGuard Monitor v2
- * Polling cada 1 s a /metrics/ y /health
- * Chart.js para gráfico EAR temporal (60 puntos)
- * Toggle dark/light con persistencia en localStorage
- */
-
 "use strict";
 
-// ── Configuración ─────────────────────────────────────────────
 const API_BASE       = "";          // mismo origen que FastAPI
 const POLL_INTERVAL  = 1000;        // ms
 const EAR_MAX_POINTS = 60;
 const EAR_THRESHOLD  = 0.25;
 
 const ALERT_CONFIG = {
-  0: { label: "NORMAL",   icon: "✅", badge: "",       color: "#00d4aa" },
-  1: { label: "BAJA",     icon: "⚠️", badge: "LOW",    color: "#ffa726" },
-  2: { label: "ALTA",     icon: "🔴", badge: "HIGH",   color: "#ef5350" },
-  3: { label: "CRÍTICO",  icon: "🚨", badge: "CRITICAL", color: "#ff1744" },
+  0: { label: "NORMAL",        icon: "✅", badge: "",           color: "#00d4aa" },
+  1: { label: "BAJA",          icon: "⚠️", badge: "LOW",        color: "#ffa726" },
+  2: { label: "ALTA",          icon: "🔴", badge: "HIGH",       color: "#ef5350" },
+  3: { label: "CRÍTICO",       icon: "🚨", badge: "CRITICAL",   color: "#ff1744" },
+  "eyes": { label: "OJOS CERRADOS", icon: "😴", badge: "EYES CLOSED", color: "#7e57c2" },
 };
 
 // ── Estado ────────────────────────────────────────────────────
@@ -26,6 +20,7 @@ const state = {
   lastAlertLevel: -1,
   timeline:      [],
   startTime:     Date.now(),
+  eyesWereClosed: false,   // track para alerta independiente de ojos cerrados
 };
 
 // ── Refs DOM ──────────────────────────────────────────────────
@@ -140,21 +135,17 @@ const earChart = new Chart(ctx, {
   },
 });
 
-// ── Helpers ───────────────────────────────────────────────────
 
-/** Offset SVG ring: circunferencia 201 px, mapea valor 0-1 a dashoffset */
 function setRing(el, value, max = 1) {
   const pct    = Math.min(Math.max(value / max, 0), 1);
   const offset = 201 - pct * 201;
   el.style.strokeDashoffset = offset;
 }
 
-/** Hora HH:MM:SS */
 function timeStr() {
   return new Date().toLocaleTimeString("es-PE", { hour12: false });
 }
 
-/** Actualiza semáforo */
 function updateSemaphore(level) {
   els.lights.forEach((l, i) => {
     l.classList.toggle("active", i === level);
@@ -165,12 +156,26 @@ function updateSemaphore(level) {
   els.alertLevelText.textContent = `Nivel ${level} / 3`;
 }
 
-/** Agrega evento al timeline */
 function addTimelineEvent(level, ear, perclos) {
   if (level === 0) return;
   const cfg  = ALERT_CONFIG[level];
   const item = { time: timeStr(), level, icon: cfg.icon, label: cfg.label,
                  ear: ear.toFixed(3), perclos: (perclos * 100).toFixed(1) };
+  state.timeline.unshift(item);
+  if (state.timeline.length > 10) state.timeline.pop();
+  renderTimeline();
+}
+
+function addEyesClosedEvent(ear) {
+  const cfg  = ALERT_CONFIG["eyes"];
+  const item = {
+    time:    timeStr(),
+    level:   "eyes",
+    icon:    cfg.icon,
+    label:   cfg.label,
+    ear:     ear.toFixed(3),
+    perclos: null,
+  };
   state.timeline.unshift(item);
   if (state.timeline.length > 10) state.timeline.pop();
   renderTimeline();
@@ -183,17 +188,22 @@ function renderTimeline() {
     return;
   }
   els.timelineCount.textContent = `${state.timeline.length} evento${state.timeline.length > 1 ? "s" : ""}`;
-  els.timelineList.innerHTML = state.timeline.map(e => `
+  els.timelineList.innerHTML = state.timeline.map(e => {
+    const perclosStr = e.perclos !== null
+      ? `EAR ${e.ear} · PERCLOS ${e.perclos}%`
+      : `EAR ${e.ear}`;
+    const badge = ALERT_CONFIG[e.level]?.badge ?? "";
+    return `
     <div class="timeline-item level-${e.level}">
       <span class="timeline-time">${e.time}</span>
       <span class="timeline-icon">${e.icon}</span>
-      <span class="timeline-text">EAR ${e.ear} · PERCLOS ${e.perclos}%</span>
-      <span class="timeline-badge badge-${e.level}">${ALERT_CONFIG[e.level].badge}</span>
+      <span class="timeline-text">${perclosStr}</span>
+      <span class="timeline-badge badge-${e.level}">${badge}</span>
     </div>
-  `).join("");
+  `;
+  }).join("");
 }
 
-/** Actualiza gráfico EAR */
 function updateChart(ear) {
   const label = timeStr();
   state.earHistory.push(ear);
@@ -295,6 +305,14 @@ async function pollMetrics() {
     }
     state.lastAlertLevel = alertLevel;
 
+    // Alerta OJOS CERRADOS: independiente del alert_level del backend
+    // Dispara cuando EAR baja de umbral y hay rostro detectado
+    const eyesClosed = ear < EAR_THRESHOLD && faceDet;
+    if (eyesClosed && !state.eyesWereClosed) {
+      addEyesClosedEvent(ear);
+    }
+    state.eyesWereClosed = eyesClosed;
+
     // Gráfico
     updateChart(ear);
 
@@ -333,13 +351,11 @@ els.btnStop.addEventListener("click", async () => {
   }
 });
 
-// ── Timeline — botón limpiar ──────────────────────────────────
 $("btnClearTimeline").addEventListener("click", () => {
   state.timeline = [];
   renderTimeline();
 });
 
-// ── Init ──────────────────────────────────────────────────────
 initTheme();
 pollHealth();
 pollMetrics();

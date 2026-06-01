@@ -23,6 +23,7 @@ logger = get_logger(__name__)
 
 def get_alert_system():
     """Retorna el sistema de alerta configurado (voz o básico)."""
+
     use_voice = os.getenv("ALERT_MODE", "voice") == "voice"
 
     if use_voice:
@@ -152,11 +153,23 @@ class AppState:
                 await asyncio.sleep(0.01)
                 continue
 
+            # --------------------------------------------------
+            # 1. Detector
+            # --------------------------------------------------
+
             result = detector.process(frame)
+
+            # --------------------------------------------------
+            # 2. Temporal
+            # --------------------------------------------------
 
             temporal_state = analyzer.update(
                 result.eye_open
             )
+
+            # --------------------------------------------------
+            # 3. Clasificación de eventos
+            # --------------------------------------------------
 
             events = classify_event(
                 result,
@@ -171,6 +184,10 @@ class AppState:
                 event_types=tuple(events),
             )
 
+            # --------------------------------------------------
+            # 4. Alertas
+            # --------------------------------------------------
+
             if hasattr(alert_system, "process_extended"):
                 alert_system.process_extended(
                     state,
@@ -180,13 +197,20 @@ class AppState:
             else:
                 alert_system.process(state)
 
-            if events:
-                for event in events:
-                    await self._save_alert(
-                        event,
-                        state,
-                        result,
-                    )
+            # --------------------------------------------------
+            # 5. Persistencia BD
+            # --------------------------------------------------
+
+            for event in events:
+                await self._save_alert(
+                    event,
+                    state,
+                    result,
+                )
+
+            # --------------------------------------------------
+            # 6. FPS
+            # --------------------------------------------------
 
             frame_count += 1
 
@@ -194,6 +218,10 @@ class AppState:
                 time.time() - t0,
                 1e-6,
             )
+
+            # --------------------------------------------------
+            # 7. Frame para streaming
+            # --------------------------------------------------
 
             out_frame = (
                 result.annotated_frame
@@ -207,6 +235,10 @@ class AppState:
             )
 
             self.last_frame = buffer.tobytes()
+
+            # --------------------------------------------------
+            # 8. Métricas API
+            # --------------------------------------------------
 
             self.last_metrics = DrowsinessMetrics(
                 ear=result.ear,
@@ -230,8 +262,6 @@ class AppState:
             )
 
             await asyncio.sleep(0)
-
-        timer.stop()
 
 
 app_state = AppState()

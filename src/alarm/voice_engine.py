@@ -28,22 +28,24 @@ class VoiceEngine:
         if self._initialized:
             return
         try:
-            self._engine = pyttsx3.init()
-            self._engine.setProperty("rate", 150)
-            self._engine.setProperty("volume", 0.9)
+            temp_engine = pyttsx3.init()
+            self._rate = 150
+            self._volume = 0.9
+            self._voice_id = None
 
-            voices = self._engine.getProperty("voices")
+            voices = temp_engine.getProperty("voices")
             for voice in voices:
                 if "spanish" in voice.name.lower() or "español" in voice.name.lower():
-                    self._engine.setProperty("voice", voice.id)
-                    logger.info(f"Voz seleccionada: {voice.name}")
+                    self._voice_id = voice.id
+                    logger.info(f"Voz seleccionada para guardar: {voice.name}")
                     break
 
+            del temp_engine
             self._speak_lock = threading.Lock()
             self._initialized = True
-            logger.info("VoiceEngine inicializado correctamente")
+            logger.info("VoiceEngine configurado correctamente")
         except Exception:
-            logger.exception("Error al inicializar VoiceEngine")
+            logger.exception("Error al configurar VoiceEngine")
             self._initialized = False
 
     def speak(self, text: str) -> None:
@@ -52,8 +54,30 @@ class VoiceEngine:
             return
 
         with self._speak_lock:
+            co_init = False
             try:
-                self._engine.say(text)
-                self._engine.runAndWait()
+                import pythoncom
+                pythoncom.CoInitialize()
+                co_init = True
+            except (ImportError, Exception):
+                pass
+
+            try:
+                engine = pyttsx3.init()
+                engine.setProperty("rate", self._rate)
+                engine.setProperty("volume", self._volume)
+                if self._voice_id:
+                    engine.setProperty("voice", self._voice_id)
+
+                engine.say(text)
+                engine.runAndWait()
+                del engine
             except Exception:
                 logger.exception(f"Error al hablar: {text}")
+            finally:
+                if co_init:
+                    try:
+                        import pythoncom
+                        pythoncom.CoUninitialize()
+                    except:
+                        pass

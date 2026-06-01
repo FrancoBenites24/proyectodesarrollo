@@ -39,15 +39,32 @@ class VoiceAlertSystem(AlertSystem):
 
     _YAWN_MESSAGE = "Has bostezado varias veces. " "Considera detenerte a descansar."
 
+    _CUSTOM_COOLDOWNS = {
+        _KEY_PHONE: 15.0,
+        _KEY_DISTRACTION: 15.0,
+        _KEY_YAWN: 15.0,
+        "somnolencia_global": 12.0,
+    }
+
     def __init__(self, webhook_url: Optional[str] = None) -> None:
         super().__init__(webhook_url=webhook_url)
         self._voice = VoiceEngine()
         self._extended_last_times: dict[str, float] = {}
         self._extended_lock = threading.Lock()
-        logger.info("VoiceAlertSystem inicializado")
+        self._phone_consecutive_frames = 0
+        self._distraction_consecutive_frames = 0
+        logger.info("VoiceAlertSystem inicializado con persistencia y cooldowns extendidos")
 
     def _play_sound(self, level: AlertLevel) -> None:
-        """Reemplaza el tono sinusoidal por un mensaje de voz."""
+        """Reemplaza el tono sinusoidal por un mensaje de voz con cooldown global de somnolencia."""
+        now = time.time()
+        with self._extended_lock:
+            last_somn = self._extended_last_times.get("somnolencia_global", 0.0)
+            cooldown = self._CUSTOM_COOLDOWNS.get("somnolencia_global", 12.0)
+            if now - last_somn < cooldown:
+                return
+            self._extended_last_times["somnolencia_global"] = now
+
         message = self._DROWSINESS_MESSAGES.get(level)
         if message:
             self._voice.speak(message)
@@ -64,27 +81,44 @@ class VoiceAlertSystem(AlertSystem):
     def _can_alert(self, key: str) -> bool:
         """Verifica y actualiza el cooldown para un tipo de alerta."""
         now = time.time()
+        cooldown = self._CUSTOM_COOLDOWNS.get(key, self.COOLDOWN_SECONDS)
         with self._extended_lock:
             last = self._extended_last_times.get(key, 0.0)
-            if now - last < self.COOLDOWN_SECONDS:
+            if now - last < cooldown:
                 return False
             self._extended_last_times[key] = now
             return True
 
     def process_extended(self, state, frame_result, timer) -> None:
-        """Procesa alertas extendidas: celular, distracción, bostezo y timer."""
-        # 1. Somnolencia normal (con su propio cooldown heredado)
-        self.process(state)
+        """Procesa alertas extendidas con persistencia y filtrado de ruido."""
+        # 1. Somnolencia normal (solo si el buffer temporal de PERCLOS tiene al menos 80 frames)
+        # Esto evita falsas alarmas instantáneas en los primeros 2.5 segundos tras iniciar
+        if state.frames_in_window >= 80:
+            self.process(state)
 
-        # 2. Celular
-        if frame_result.phone_detected and self._can_alert(_KEY_PHONE):
-            logger.warning("Alerta: celular detectado")
-            self._speak_async(self._PHONE_MESSAGE)
+        # 2. Celular (requiere persistencia de 30 frames consecutivos ~ 1.0 segundo a 30fps)
+        if frame_result.phone_detected:
+            self._phone_consecutive_frames += 1
+        else:
+            self._phone_consecutive_frames = 0
 
-        # 3. Distracción
-        if frame_result.is_distracted and self._can_alert(_KEY_DISTRACTION):
-            logger.warning("Alerta: conductor distraído")
-            self._speak_async(self._DISTRACTION_MESSAGE)
+        if self._phone_consecutive_frames >= 30:
+            if self._can_alert(_KEY_PHONE):
+                logger.warning("Alerta: celular detectado (persistente)")
+                self._speak_async(self._PHONE_MESSAGE)
+            self._phone_consecutive_frames = 30  # tope para no desbordar
+
+        # 3. Distracción (requiere persistencia de 45 frames consecutivos ~ 1.5 segundos a 30fps)
+        if frame_result.is_distracted:
+            self._distraction_consecutive_frames += 1
+        else:
+            self._distraction_consecutive_frames = 0
+
+        if self._distraction_consecutive_frames >= 45:
+            if self._can_alert(_KEY_DISTRACTION):
+                logger.warning("Alerta: conductor distraído (persistente)")
+                self._speak_async(self._DISTRACTION_MESSAGE)
+            self._distraction_consecutive_frames = 45  # tope para no desbordar
 
         # 4. Bostezo
         if frame_result.yawning and self._can_alert(_KEY_YAWN):

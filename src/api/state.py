@@ -87,9 +87,15 @@ class AppState:
                 await self._task
             except asyncio.CancelledError:
                 pass
+            except Exception as e:
+                logger.error(f"Error esperando a la tarea de detección al detener: {e}")
 
         if self._stream:
-            self._stream.stop()
+            try:
+                self._stream.stop()
+            except Exception as e:
+                logger.error(f"Error liberando el VideoStream: {e}")
+            self._stream = None
         self.driving_timer.stop()
         self.camera_connected = False
 

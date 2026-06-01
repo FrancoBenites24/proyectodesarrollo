@@ -373,27 +373,35 @@ async function pollMetrics() {
 // ── Controles de stream ───────────────────────────────────────
 els.btnStart.addEventListener("click", async () => {
   try {
-    await fetch(`${API_BASE}/stream/start`, {
+    const res = await fetch(`${API_BASE}/stream/start`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ source: 0 }),
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.detail || `HTTP ${res.status}`);
+    }
     els.videoFeed.src = `${API_BASE}/stream/video`;
     els.videoFeed.style.display      = "block";
     els.videoPlaceholder.style.display = "none";
-  } catch {
-    alert("No se pudo iniciar el stream. Verifica que la API esté activa.");
+  } catch (err) {
+    alert(`No se pudo iniciar el stream: ${err.message}`);
   }
 });
 
 els.btnStop.addEventListener("click", async () => {
   try {
-    await fetch(`${API_BASE}/stream/stop`, { method: "POST" });
+    const res = await fetch(`${API_BASE}/stream/stop`, { method: "POST" });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.detail || `HTTP ${res.status}`);
+    }
     els.videoFeed.src               = "";
     els.videoFeed.style.display     = "none";
     els.videoPlaceholder.style.display = "flex";
-  } catch {
-    alert("No se pudo detener el stream.");
+  } catch (err) {
+    alert(`No se pudo detener el stream: ${err.message}`);
   }
 });
 

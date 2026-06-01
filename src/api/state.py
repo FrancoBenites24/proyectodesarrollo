@@ -102,11 +102,11 @@ class AppState:
     async def _save_alert(
         self,
         event_type: str,
-        state,
+        state: TemporalState,
         result,
     ) -> None:
         """
-        Guarda una alerta en la BD.
+        Guarda una alerta en la base de datos.
         """
 
         try:
@@ -180,12 +180,13 @@ class AppState:
             else:
                 alert_system.process(state)
 
-            for event in events:
-                await self._save_alert(
-                    event,
-                    state,
-                    result,
-                )
+            if events:
+                for event in events:
+                    await self._save_alert(
+                        event,
+                        state,
+                        result,
+                    )
 
             frame_count += 1
 
@@ -229,6 +230,8 @@ class AppState:
             )
 
             await asyncio.sleep(0)
+
+        timer.stop()
 
 
 app_state = AppState()

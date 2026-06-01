@@ -8,6 +8,12 @@ from src.core.temporal import AlertLevel
 def classify_event(result, state) -> list[str]:
     """
     Clasifica los eventos activos en el frame actual.
+
+    Eventos soportados:
+    - drowsiness
+    - phone
+    - yawn
+    - distraction
     """
 
     events: list[str] = []

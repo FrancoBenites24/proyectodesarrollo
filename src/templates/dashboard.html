@@ -90,6 +90,12 @@
       <div class="face-warning" id="faceWarning" style="display:none;">
         👤 Sin rostro detectado
       </div>
+      <div class="face-warning phone-warning" id="phoneWarning" style="display:none;">
+        📱 Uso de celular detectado
+      </div>
+      <div class="face-warning distraction-warning" id="distractionWarning" style="display:none;">
+        ⚠️ Distracción detectada
+      </div>
     </div>
  
     <!-- Card 3: Métricas numéricas -->
@@ -154,6 +160,34 @@
             </div>
           </div>
           <div class="metric-desc" id="descFps">Sin datos</div>
+        </div>
+
+        <div class="metric-item" id="metricYawPitch">
+          <div class="metric-ring">
+            <svg viewBox="0 0 80 80">
+              <circle class="ring-bg" cx="40" cy="40" r="32"/>
+              <circle class="ring-fill yaw-ring" cx="40" cy="40" r="32" id="ringYaw"/>
+            </svg>
+            <div class="metric-center">
+              <div class="metric-value" id="valYawPitch">—</div>
+              <div class="metric-unit">POSE</div>
+            </div>
+          </div>
+          <div class="metric-desc" id="descYawPitch">Sin datos</div>
+        </div>
+
+        <div class="metric-item" id="metricTime">
+          <div class="metric-ring">
+            <svg viewBox="0 0 80 80">
+              <circle class="ring-bg" cx="40" cy="40" r="32"/>
+              <circle class="ring-fill time-ring" cx="40" cy="40" r="32" id="ringTime"/>
+            </svg>
+            <div class="metric-center">
+              <div class="metric-value" id="valTime">—</div>
+              <div class="metric-unit">TIEMPO</div>
+            </div>
+          </div>
+          <div class="metric-desc" id="descTime">Sin datos</div>
         </div>
       </div>
     </div>

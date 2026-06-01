@@ -56,14 +56,22 @@ const els = {
   valMor:     $("valMor"),
   valPerclos: $("valPerclos"),
   valFps:     $("valFps"),
+  valYawPitch:$("valYawPitch"),
+  valTime:    $("valTime"),
   descEar:    $("descEar"),
   descMor:    $("descMor"),
   descPerclos:$("descPerclos"),
   descFps:    $("descFps"),
+  descYawPitch:$("descYawPitch"),
+  descTime:   $("descTime"),
   ringEar:    $("ringEar"),
   ringMor:    $("ringMor"),
   ringPerclos:$("ringPerclos"),
   ringFps:    $("ringFps"),
+  ringYaw:    $("ringYaw"),
+  ringTime:   $("ringTime"),
+  phoneWarning: $("phoneWarning"),
+  distractionWarning: $("distractionWarning"),
   lastUpdate: $("lastUpdate"),
   timelineList:  $("timelineList"),
   timelineCount: $("timelineCount"),
@@ -166,11 +174,29 @@ function updateSemaphore(level) {
 }
 
 /** Agrega evento al timeline */
-function addTimelineEvent(level, ear, perclos) {
-  if (level === 0) return;
-  const cfg  = ALERT_CONFIG[level];
-  const item = { time: timeStr(), level, icon: cfg.icon, label: cfg.label,
-                 ear: ear.toFixed(3), perclos: (perclos * 100).toFixed(1) };
+function addTimelineEvent(level, data) {
+  let reasons = [];
+  if (data.phone_detected) reasons.push("📱 Celular");
+  if (data.is_distracted) reasons.push("⚠️ Distracción");
+  if (data.yawning) reasons.push("🥱 Bostezo");
+  if (level > 0) {
+    const cfg = ALERT_CONFIG[level];
+    reasons.push(`${cfg.icon} Somnolencia (${cfg.label})`);
+  }
+  
+  if (reasons.length === 0) return;
+  const reasonStr = reasons.join(" + ");
+  
+  const icon = data.phone_detected ? "📱" : (data.is_distracted ? "⚠️" : (ALERT_CONFIG[level] || ALERT_CONFIG[0]).icon);
+  const text = `${reasonStr} · EAR: ${data.ear.toFixed(3)} · PERCLOS: ${(data.perclos * 100).toFixed(1)}%`;
+  
+  const item = {
+    time: timeStr(),
+    level: level > 0 ? level : 1,
+    icon,
+    text
+  };
+  
   state.timeline.unshift(item);
   if (state.timeline.length > 10) state.timeline.pop();
   renderTimeline();
@@ -187,8 +213,8 @@ function renderTimeline() {
     <div class="timeline-item level-${e.level}">
       <span class="timeline-time">${e.time}</span>
       <span class="timeline-icon">${e.icon}</span>
-      <span class="timeline-text">EAR ${e.ear} · PERCLOS ${e.perclos}%</span>
-      <span class="timeline-badge badge-${e.level}">${ALERT_CONFIG[e.level].badge}</span>
+      <span class="timeline-text">${e.text}</span>
+      <span class="timeline-badge badge-${e.level}">${(ALERT_CONFIG[e.level] || ALERT_CONFIG[1]).badge}</span>
     </div>
   `).join("");
 }
@@ -255,9 +281,17 @@ async function pollMetrics() {
     const fps        = data.fps        ?? 0;
     const alertLevel = data.alert_level ?? 0;
     const faceDet    = data.face_detected ?? false;
+    const phoneDet   = data.phone_detected ?? false;
+    const isDist     = data.is_distracted ?? false;
+    const yaw        = data.head_yaw   ?? 0;
+    const pitch      = data.head_pitch ?? 0;
+    const yawn       = data.yawning    ?? false;
+    const driveMin   = data.driving_minutes ?? 0;
 
-    // Rostro
+    // Rostro y alertas adicionales
     els.faceWarning.style.display = faceDet ? "none" : "block";
+    els.phoneWarning.style.display = phoneDet ? "block" : "none";
+    els.distractionWarning.style.display = isDist ? "block" : "none";
 
     // Semáforo
     updateSemaphore(alertLevel);
@@ -268,20 +302,30 @@ async function pollMetrics() {
     els.valMor.textContent     = mor.toFixed(3);
     els.valPerclos.textContent = `${(perclos * 100).toFixed(0)}%`;
     els.valFps.textContent     = fps.toFixed(0);
+    els.valYawPitch.textContent = `${yaw.toFixed(0)}°/${pitch.toFixed(0)}°`;
+    els.valTime.textContent     = `${driveMin.toFixed(1)}m`;
 
     els.descEar.textContent     = ear > 0.25   ? "Ojos abiertos"      : "⚠ Ojos cerrados";
-    els.descMor.textContent     = mor > 0.60   ? "Bostezo detectado"  : "Normal";
+    els.descMor.textContent     = yawn         ? "Bostezo detectado"  : "Normal";
     els.descPerclos.textContent = perclos < 0.2 ? "Normal"
                                 : perclos < 0.4 ? "Atención"
                                 : perclos < 0.6 ? "Alerta"
                                 : "⚠ Crítico";
     els.descFps.textContent     = fps > 0 ? "En vivo" : "Detenido";
+    els.descYawPitch.textContent = isDist ? "⚠ Distraído" : "Mirada al frente";
+    els.descTime.textContent     = driveMin < 30 ? "Viaje reciente"
+                                 : driveMin < 90 ? "Conducción media"
+                                 : "Sugerido descansar";
 
     // Anillos SVG
     setRing(els.ringEar,     ear,     0.5);
     setRing(els.ringMor,     mor,     1.0);
     setRing(els.ringPerclos, perclos, 1.0);
     setRing(els.ringFps,     fps,     30);
+    
+    const avgDeviation = Math.min(Math.sqrt(yaw*yaw + pitch*pitch), 45);
+    setRing(els.ringYaw,     avgDeviation, 45);
+    setRing(els.ringTime,    driveMin,     120);
 
     // Color anillo EAR según umbral
     els.ringEar.style.stroke = ear < 0.25 ? "#ef5350" : "#42a5f5";
@@ -289,11 +333,13 @@ async function pollMetrics() {
     // FPS badge
     els.fpsBadge.textContent = `${fps.toFixed(0)} FPS`;
 
-    // Timeline — solo cuando cambia a nivel > 0
-    if (alertLevel > 0 && alertLevel !== state.lastAlertLevel) {
-      addTimelineEvent(alertLevel, ear, perclos);
+    // Timeline — cuando hay cualquier alerta activa o cambio de estado de fatiga/teléfono
+    const isAlerting = alertLevel > 0 || phoneDet || isDist || yawn;
+    const currentStateKey = `${alertLevel}-${phoneDet}-${isDist}-${yawn}`;
+    if (isAlerting && currentStateKey !== state.lastStateKey) {
+      addTimelineEvent(alertLevel, data);
     }
-    state.lastAlertLevel = alertLevel;
+    state.lastStateKey = currentStateKey;
 
     // Gráfico
     updateChart(ear);

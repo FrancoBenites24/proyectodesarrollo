@@ -39,7 +39,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 app.include_router(health.router, tags=["Health"])
 app.include_router(stream.router, prefix="/stream", tags=["Stream"])
 app.include_router(metrics.router, prefix="/metrics", tags=["Metrics"])
@@ -53,3 +52,8 @@ templates = Jinja2Templates(directory="src/templates")
 @app.get("/", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
+
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_page(request: Request):
+    return templates.TemplateResponse("admin.html", {"request": request})

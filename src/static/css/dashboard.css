@@ -370,6 +370,8 @@ body {
 .mor-ring     { stroke: var(--warning); }
 .perclos-ring { stroke: var(--accent); }
 .fps-ring     { stroke: #ab47bc; }
+.yaw-ring     { stroke: #26a69a; }
+.time-ring    { stroke: #e91e63; }
 
 .metric-center {
   position: absolute;
@@ -519,4 +521,24 @@ body {
   .timeline-section { margin: 0 0.75rem 0.75rem; }
   .header { padding: 0.75rem 1rem; }
   .title-sub { display: none; }
+}
+
+/* ── Estilos de Advertencia Especiales ─────────────────────────── */
+.phone-warning {
+  background: rgba(255, 23, 68, 0.1) !important;
+  border: 1px solid var(--critical) !important;
+  color: var(--critical) !important;
+  margin-top: 0.5rem;
+  animation: blink-warning 1s infinite alternate;
+}
+.distraction-warning {
+  background: rgba(255, 167, 38, 0.1) !important;
+  border: 1px solid var(--warning) !important;
+  color: var(--warning) !important;
+  margin-top: 0.5rem;
+  animation: blink-warning 1.5s infinite alternate;
+}
+@keyframes blink-warning {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
 }

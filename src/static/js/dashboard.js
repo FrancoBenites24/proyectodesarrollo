@@ -262,6 +262,24 @@ async function pollHealth() {
       span.textContent = cam ? "Activa" : "Sin señal";
     }
 
+    // Habilitar/Deshabilitar botones y sincronizar feed de video
+    els.btnStart.disabled = cam;
+    els.btnStop.disabled = !cam;
+
+    if (cam) {
+      if (els.videoFeed.src !== `${window.location.origin}${API_BASE}/stream/video` && els.videoFeed.src !== `${API_BASE}/stream/video`) {
+        els.videoFeed.src = `${API_BASE}/stream/video`;
+        els.videoFeed.style.display      = "block";
+        els.videoPlaceholder.style.display = "none";
+      }
+    } else {
+      if (els.videoFeed.src !== "" && !els.videoFeed.src.endsWith("#")) {
+        els.videoFeed.src = "";
+        els.videoFeed.style.display      = "none";
+        els.videoPlaceholder.style.display = "flex";
+      }
+    }
+
   } catch {
     els.connectionDot.className    = "connection-dot error";
     els.connectionText.textContent = "Sin conexión";

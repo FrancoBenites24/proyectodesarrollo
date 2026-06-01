@@ -249,4 +249,3 @@ class AppState:
 
 
 app_state = AppState()
-

@@ -29,9 +29,8 @@ class TemporalState:
     frames_in_window: int
     closed_frames: int
 
-    # NUEVO (Issue #32)
+    # NUEVO
     event_types: tuple[str, ...] = ()
-
 
 class TemporalAnalyzer:
     """Ventana deslizante para cálculo de PERCLOS.

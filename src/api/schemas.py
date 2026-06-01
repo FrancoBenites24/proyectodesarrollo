@@ -16,19 +16,46 @@ class AlertLevelSchema(IntEnum):
 
 
 class DrowsinessMetrics(BaseModel):
-    ear: float = Field(ge=0.0, le=1.0, description="Eye Aspect Ratio")
-    mor: float = Field(ge=0.0, description="Mouth Open Ratio")
-    perclos: float = Field(ge=0.0, le=1.0, description="% frames ojos cerrados")
+    ear: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="Eye Aspect Ratio",
+    )
+
+    mor: float = Field(
+        ge=0.0,
+        description="Mouth Open Ratio",
+    )
+
+    perclos: float = Field(
+        ge=0.0,
+        le=1.0,
+        description="% frames ojos cerrados",
+    )
+
     alert_level: AlertLevelSchema
 
+    # Detección de celular
     phone_detected: bool = False
+
+    # Distracción por pose de cabeza
     is_distracted: bool = False
+
+    # Ángulos de cabeza
     head_yaw: float = 0.0
     head_pitch: float = 0.0
 
+    # NUEVO
+    yawning: bool = False
+
+    # NUEVO
+    driving_minutes: float = 0.0
+
     face_detected: bool
 
-    fps: float = Field(ge=0.0)
+    fps: float = Field(
+        ge=0.0,
+    )
 
     timestamp: float
 
@@ -43,5 +70,5 @@ class SystemHealth(BaseModel):
 class StreamStartRequest(BaseModel):
     source: int | str = Field(
         default=0,
-        description="Fuente de cámara: 0 para webcam, o ruta a archivo de video",
+        description=("Fuente de cámara: " "0 para webcam, o ruta a archivo de video"),
     )

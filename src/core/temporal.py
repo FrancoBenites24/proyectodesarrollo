@@ -32,6 +32,7 @@ class TemporalState:
     # NUEVO
     event_types: tuple[str, ...] = ()
 
+
 class TemporalAnalyzer:
     """Ventana deslizante para cálculo de PERCLOS.
 
@@ -101,6 +102,4 @@ class TemporalAnalyzer:
 
         self._buffer.clear()
 
-        logger.debug(
-            "TemporalAnalyzer buffer reiniciado"
-        )
+        logger.debug("TemporalAnalyzer buffer reiniciado")

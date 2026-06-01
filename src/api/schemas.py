@@ -70,8 +70,5 @@ class SystemHealth(BaseModel):
 class StreamStartRequest(BaseModel):
     source: int | str = Field(
         default=0,
-        description=(
-            "Fuente de cámara: "
-            "0 para webcam, o ruta a archivo de video"
-        ),
+        description=("Fuente de cámara: " "0 para webcam, o ruta a archivo de video"),
     )

@@ -68,18 +68,12 @@ class AppState:
             self.camera_connected = True
             self.is_running = True
 
-            self._task = asyncio.create_task(
-                self._detection_loop()
-            )
+            self._task = asyncio.create_task(self._detection_loop())
 
-            logger.info(
-                f"Detección iniciada | source={source}"
-            )
+            logger.info(f"Detección iniciada | source={source}")
 
         except RuntimeError:
-            logger.exception(
-                "No se pudo iniciar el stream de video"
-            )
+            logger.exception("No se pudo iniciar el stream de video")
             raise
 
     async def stop(self) -> None:
@@ -127,9 +121,7 @@ class AppState:
                 await session.commit()
 
         except Exception:
-            logger.exception(
-                "Error guardando alerta"
-            )
+            logger.exception("Error guardando alerta")
 
     async def _detection_loop(self) -> None:
 
@@ -163,9 +155,7 @@ class AppState:
             # 2. Temporal
             # --------------------------------------------------
 
-            temporal_state = analyzer.update(
-                result.eye_open
-            )
+            temporal_state = analyzer.update(result.eye_open)
 
             # --------------------------------------------------
             # 3. Clasificación de eventos
@@ -224,9 +214,7 @@ class AppState:
             # --------------------------------------------------
 
             out_frame = (
-                result.annotated_frame
-                if result.annotated_frame is not None
-                else frame
+                result.annotated_frame if result.annotated_frame is not None else frame
             )
 
             _, buffer = cv2.imencode(
@@ -244,9 +232,7 @@ class AppState:
                 ear=result.ear,
                 mor=result.mor,
                 perclos=state.perclos,
-                alert_level=AlertLevelSchema(
-                    int(state.alert_level)
-                ),
+                alert_level=AlertLevelSchema(int(state.alert_level)),
                 phone_detected=result.phone_detected,
                 is_distracted=result.is_distracted,
                 head_yaw=result.head_yaw,

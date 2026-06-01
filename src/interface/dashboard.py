@@ -225,16 +225,14 @@ def render_sidebar(health: dict[str, Any]) -> tuple[bool, int | str]:
 
         st.divider()
         st.markdown("### 📋 Leyenda PERCLOS")
-        st.markdown(
-            """
+        st.markdown("""
             | Nivel | PERCLOS |
             |-------|---------|
             | ✅ Normal | < 20% |
             | ⚠️ Bajo   | 20–40% |
             | 🔶 Alto   | 40–60% |
             | 🚨 Crítico | > 60% |
-            """
-        )
+            """)
 
         return auto_refresh, source  # type: ignore[return-value]
 

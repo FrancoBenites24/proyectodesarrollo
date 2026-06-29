@@ -28,21 +28,3 @@ services:
       timeout: 5s
       retries: 5
 
-  dashboard:
-    build:
-      context: .
-      target: runtime
-    container_name: drowsyguard-dashboard
-    command: >
-      streamlit run src/interface/dashboard.py
-      --server.port=8501
-      --server.address=0.0.0.0
-    ports:
-      - "8501:8501"
-    environment:
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
-      - API_URL=http://api:8000
-    depends_on:
-      api:
-        condition: service_healthy
-    restart: unless-stopped

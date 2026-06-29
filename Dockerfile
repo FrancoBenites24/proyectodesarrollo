@@ -45,9 +45,8 @@ USER appuser
 # Crear directorio de logs
 RUN mkdir -p logs
 
-# Exponer puertos para API (8000) y Dashboard (8501)
+# Exponer puerto para API (8000)
 EXPOSE 8000
-EXPOSE 8501
 
 # Healthcheck básico usando python
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \

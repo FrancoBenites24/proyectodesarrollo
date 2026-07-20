@@ -8,7 +8,7 @@
 
 // ── Configuración ─────────────────────────────────────────────
 const API_BASE       = "";          // mismo origen que FastAPI
-const POLL_INTERVAL  = 1000;        // ms
+const POLL_INTERVAL  = 250;        // ms
 const EAR_MAX_POINTS = 60;
 const EAR_THRESHOLD  = 0.25;
 

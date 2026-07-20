@@ -1,6 +1,24 @@
 version: "3.9"
 
 services:
+  db:
+    image: postgres:15-alpine
+    container_name: drowsyguard-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-drowsyguard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-drowsyguard123}
+      POSTGRES_DB: ${POSTGRES_DB:-drowsyguard}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-drowsyguard} -d $${POSTGRES_DB:-drowsyguard}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   api:
     build:
       context: .
@@ -19,8 +37,12 @@ services:
       - PERCLOS_WINDOW_SECONDS=${PERCLOS_WINDOW_SECONDS:-3}
       - ALARM_COOLDOWN_SECONDS=${ALARM_COOLDOWN_SECONDS:-5}
       - ALARM_WEBHOOK_URL=${ALARM_WEBHOOK_URL:-}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-drowsyguard}:${POSTGRES_PASSWORD:-drowsyguard123}@db:5432/${POSTGRES_DB:-drowsyguard}
     volumes:
       - ./logs:/app/logs
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import http.client; conn = http.client.HTTPConnection('localhost', 8000); conn.request('GET', '/health'); r = conn.getresponse(); exit(0 if r.status == 200 else 1)"]
@@ -28,3 +50,5 @@ services:
       timeout: 5s
       retries: 5
 
+volumes:
+  pgdata:

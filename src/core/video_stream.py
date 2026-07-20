@@ -49,11 +49,27 @@ class VideoStream:
         Raises:
             RuntimeError: Si la fuente de video no puede abrirse.
         """
+        import os
+        self.source = source
         self._cap = cv2.VideoCapture(source)
+        if not self._cap.isOpened():
+            fallback_source = os.getenv("FALLBACK_VIDEO_PATH")
+            if fallback_source:
+                logger.warning(
+                    f"No se pudo abrir la fuente {source}. "
+                    f"Intentando usar el video de fallback: {fallback_source}"
+                )
+                self.source = fallback_source
+                try:
+                    open_source = int(fallback_source)
+                except ValueError:
+                    open_source = fallback_source
+                self._cap = cv2.VideoCapture(open_source)
+
         if not self._cap.isOpened():
             raise RuntimeError(
                 f"No se puede abrir la fuente de video: {source}. "
-                "Verifica que la webcam esté conectada."
+                "Verifica que la webcam esté conectada o configura FALLBACK_VIDEO_PATH."
             )
 
         self._queue: Queue[np.ndarray] = Queue(maxsize=buffer_size)
@@ -118,9 +134,18 @@ class VideoStream:
             ret, frame = self._cap.read()
 
             if not ret:
-                logger.error("VideoStream: fallo al leer frame de la fuente")
-                self._running = False
-                break
+                # Si es un archivo de video (ruta de texto), reiniciar al principio (loop)
+                if isinstance(self.source, str) and not self.source.isdigit():
+                    self._cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                    ret, frame = self._cap.read()
+                    if not ret:
+                        logger.error("VideoStream: fallo al leer frame de la fuente (incluso reiniciando el video)")
+                        self._running = False
+                        break
+                else:
+                    logger.error("VideoStream: fallo al leer frame de la fuente")
+                    self._running = False
+                    break
 
             # Si el buffer está lleno, descartar el frame más viejo
             if self._queue.full():

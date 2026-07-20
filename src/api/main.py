@@ -1,17 +1,14 @@
 """Aplicación FastAPI principal."""
-
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 
-from src.api.database import Base, engine
-from src.api.routes import alerts, drivers, health, metrics, stream
+from src.api.database import engine, Base
+from src.api.routes import health, metrics, stream, drivers, alerts
+from src.api.routes import sessions, stats, ws
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -39,21 +36,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 app.include_router(health.router, tags=["Health"])
 app.include_router(stream.router, prefix="/stream", tags=["Stream"])
 app.include_router(metrics.router, prefix="/metrics", tags=["Metrics"])
 app.include_router(drivers.router, prefix="/drivers", tags=["Drivers"])
 app.include_router(alerts.router, prefix="/alerts", tags=["Alerts"])
-
-app.mount("/static", StaticFiles(directory="src/static"), name="static")
-templates = Jinja2Templates(directory="src/templates")
-
-
-@app.get("/", response_class=HTMLResponse)
-async def dashboard_page(request: Request):
-    return templates.TemplateResponse("dashboard.html", {"request": request})
-
-
-@app.get("/admin", response_class=HTMLResponse)
-async def admin_page(request: Request):
-    return templates.TemplateResponse("admin.html", {"request": request})
+app.include_router(sessions.router, prefix="/sessions", tags=["Sessions"])
+app.include_router(stats.router, prefix="/stats", tags=["Stats"])
+app.include_router(ws.router, tags=["WebSocket"])
